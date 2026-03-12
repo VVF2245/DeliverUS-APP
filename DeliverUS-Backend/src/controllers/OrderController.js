@@ -123,6 +123,13 @@ const destroy = async function (req, res) {
 const confirm = async function (req, res) {
   try {
     const order = await Order.findByPk(req.params.orderId)
+    if (!order) {
+      return res.status(404).send('Orden no encontrada')
+    }
+    const estado = order.getStatus()
+    if (estado !== 'pending') {
+      return res.status(422).send('Solo se confirman pedidos que esten pendientes de confirmación')
+    }
     order.startedAt = new Date()
     const updatedOrder = await order.save()
     res.json(updatedOrder)
