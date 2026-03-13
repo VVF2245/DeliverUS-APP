@@ -83,14 +83,33 @@ const indexRestaurant = async function (req, res) {
   }
 }
 
-// TODO: Implement the indexCustomer function that queries orders from current logged-in customer and send them back.
+// Hecho(Lo dejo temporalmente para que se vea lo que pedian): Implement the indexCustomer function that queries orders from current logged-in customer and send them back.
 // Orders have to include products that belongs to each order and restaurant details
 // sort them by createdAt date, desc.
 const indexCustomer = async function (req, res) {
-  res.status(500).send('This function is to be implemented')
+  try {
+    const orders = await Order.findAll(
+      {
+        attributes: { exclude: ['userId'] },
+        where: { userId: req.user.id },
+        include: [{
+          model: Product,
+          as: 'products'
+        },
+        {
+          model: Restaurant,
+          as: 'restaurant'
+        }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+    res.json(orders)
+  } catch (err) {
+    res.status(500).send(err)
+  }
 }
 
-// TODO: Implement the create function that receives a new order and stores it in the database.
+// Hecho(Lo dejo temporalmente para que se vea lo que pedian): Implement the create function that receives a new order and stores it in the database.
 // Take into account that:
 // 1. If price is greater than 10€, shipping costs have to be 0.
 // 2. If price is less or equals to 10€, shipping costs have to be restaurant default shipping costs and have to be added to the order total price
@@ -98,8 +117,51 @@ const indexCustomer = async function (req, res) {
 // 4. If an exception is raised, catch it and rollback the transaction
 
 const create = async (req, res) => {
-  // Use sequelizeSession to start a transaction
-  res.status(500).send('This function is to be implemented')
+  const transaction = await sequelizeSession.transaction()
+
+  try {
+    const orderData = req.body
+
+    // Obtener restaurante para saber sus gastos de envío
+    const restaurant = await Restaurant.findByPk(orderData.restaurantId)
+
+    let shippingCosts = 0
+    let totalPrice = orderData.price
+
+    if (orderData.price <= 10) {
+      shippingCosts = restaurant.shippingCosts
+      totalPrice += shippingCosts
+    }
+
+    // Crear pedido
+    const order = await Order.create({
+      price: totalPrice,
+      address: orderData.address,
+      restaurantId: orderData.restaurantId,
+      userId: req.user.id,
+      shippingCosts
+    }, { transaction })
+
+    // Crear líneas de productos
+    for (const product of orderData.products) {
+      await order.addProduct(product.productId, {
+        through: {
+          quantity: product.quantity,
+          unityPrice: product.unityPrice
+        },
+        transaction
+      })
+    }
+
+    // Confirmar transacción
+    await transaction.commit()
+
+    res.status(201).json(order)
+  } catch (error) {
+    // Revertir si algo falla
+    await transaction.rollback()
+    res.status(500).json({ error: error.message })
+  }
 }
 
 // TODO: Implement the update function that receives a modified order and persists it in the database.
