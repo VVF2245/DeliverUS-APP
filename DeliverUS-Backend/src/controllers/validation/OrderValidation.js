@@ -1,4 +1,5 @@
 import { Restaurant, Product, Order } from "#root/src/models/models.js"
+import { check } from 'express-validator'
 
 // TODO: Include validation rules for create that should:
 // 1. Check that restaurantId is present in the body and corresponds to an existing restaurant
