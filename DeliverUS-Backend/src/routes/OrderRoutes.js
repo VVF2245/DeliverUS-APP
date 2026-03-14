@@ -9,6 +9,14 @@ const loadFileRoutes = function (app) {
   // 1. Retrieving orders from current logged-in customer
   // 2. Creating a new order (only customers can create new orders)
 
+  // 1
+  app.route('/orders')
+    .get(
+      isLoggedIn,
+      hasRole('customer'),
+      OrderController.indexCustomer
+    )
+
   app.route('/orders/:orderId/confirm')
     .patch(
       isLoggedIn,
