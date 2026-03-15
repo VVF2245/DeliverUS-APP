@@ -19,6 +19,7 @@ const create = [
 
     const restaurantIdSet = new Set(dbProducts.map(p => p.restaurantId))
     if (restaurantIdSet.size > 1) throw new Error('All products must belong to the same restaurant')
+    
     if (req.body.restaurantId && !restaurantIdSet.has(req.body.restaurantId)) {
       throw new Error('Products do not match the restaurantId in the body')
     }
