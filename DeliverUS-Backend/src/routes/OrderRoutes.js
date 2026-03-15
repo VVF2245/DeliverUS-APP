@@ -35,15 +35,30 @@ const loadFileRoutes = function (app) {
       OrderMiddleware.checkOrderCanBeDelivered,
       OrderController.deliver)
 
-  // TODO: Include routes for:
+  // HECHO: Include routes for:
   // 3. Editing order (only customers can edit their own orders)
   // 4. Remove order (only customers can remove their own orders)
+
   app.route('/orders/:orderId')
     .get(
       isLoggedIn,
       checkEntityExists(Order, 'orderId'),
       OrderMiddleware.checkOrderVisible,
       OrderController.show)
+    .put(
+      isLoggedIn,
+      hasRole('customer'),
+      checkEntityExists(Order, 'orderId'),
+      OrderMiddleware.checkOrderCustomer,
+      OrderMiddleware.checkOrderIsPending, // Si ya esta pendiente no tiene sentido modificarla
+      OrderController.update)
+    .delete(
+      isLoggedIn,
+      hasRole('customer'),
+      checkEntityExists(Order, 'orderId'),
+      OrderMiddleware.checkOrderCustomer,
+      OrderMiddleware.checkOrderIsPending, // Si ya esta pendiente no tiene sentido eliminarla
+      OrderController.destroy)
 }
 
 export default loadFileRoutes
