@@ -58,14 +58,14 @@ const loadFileRoutes = function (app) {
       hasRole('customer'),
       checkEntityExists(Order, 'orderId'),
       OrderMiddleware.checkOrderCustomer,
-      OrderMiddleware.checkOrderIsPending, // Si ya esta pendiente no tiene sentido modificarla
+      OrderMiddleware.checkOrderIsPending, // Si ya esta confirmada o entregada no tienen sentido editarla
       OrderController.update)
     .delete(
       isLoggedIn,
       hasRole('customer'),
       checkEntityExists(Order, 'orderId'),
       OrderMiddleware.checkOrderCustomer,
-      OrderMiddleware.checkOrderIsPending, // Si ya esta pendiente no tiene sentido eliminarla
+      OrderMiddleware.checkOrderIsPending, // Si ya esta confirmada o entregada no tienen sentido editarla
       OrderController.destroy)
 }
 
