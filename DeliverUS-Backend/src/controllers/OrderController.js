@@ -175,7 +175,7 @@ const update = async function (req, res) {
 
   try {
     const orderData = req.body
-    const orderId = req.params.id
+    const orderId = req.params.orderId
 
     // Obtener el restaurante para calcular gastos de envío
     const restaurant = await Restaurant.findByPk(orderData.restaurantId)
@@ -241,7 +241,7 @@ const destroy = async function (req, res) {
   const transaction = await sequelizeSession.transaction()
 
   try {
-    const orderId = req.params.id
+    const orderId = req.params.orderId // el nombre tiene que coincidir con el del path param de la ruta
 
     // Buscar la orden
     const order = await Order.findByPk(orderId, { transaction })
