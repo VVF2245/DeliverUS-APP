@@ -4,6 +4,7 @@ import { checkEntityExists } from '../middlewares/EntityMiddleware.js'
 import * as OrderMiddleware from '../middlewares/OrderMiddleware.js'
 import { Order } from '../models/models.js'
 import OrderValidation from '../controllers/validation/OrderValidation.js'
+import { handleValidation } from '../middlewares/ValidationHandlingMiddleware.js'
 
 const loadFileRoutes = function (app) {
   // TODO: Include routes for:
@@ -20,7 +21,9 @@ const loadFileRoutes = function (app) {
     .post(
       isLoggedIn,
       hasRole('customer'),
+      OrderMiddleware.checkRestaurantExists,
       OrderValidation.create,
+      handleValidation,
       OrderController.create)
   app.route('/orders/:orderId/confirm')
     .patch(

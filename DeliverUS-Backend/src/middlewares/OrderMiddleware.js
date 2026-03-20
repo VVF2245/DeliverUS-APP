@@ -33,7 +33,7 @@ const checkRestaurantExists = async (req, res, next) => {
     const restaurant = await Restaurant.findByPk(restaurantId)
 
     if (!restaurant) {
-      return res.status(404).json({ message: 'Restaurant not found' })
+      return res.status(409).json({ message: 'Restaurant not found' })
     }
 
     next()

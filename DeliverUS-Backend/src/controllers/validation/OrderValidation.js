@@ -1,4 +1,4 @@
-import { Restaurant, Product, Order } from '#root/src/models/models.js'
+import { Restaurant, Product, Order } from '../../models/models.js'
 import { check } from 'express-validator'
 
 // TODO: Include validation rules for create that should:
@@ -7,29 +7,59 @@ import { check } from 'express-validator'
 // 3. Check that products are available
 // 4. Check that all the products belong to the same restaurant
 const create = [
-  check('restaurantId').exists().withMessage('restaurantId is required').isInt().custom(async (value) => {
-    const restaurant = await Restaurant.findByPk(value)
-    if (!restaurant) throw new Error('Restaurant not found')
-  }),
-  check('products').exists().isArray({ min: 1 }).custom(async (products, { req }) => {
-    const productIds = products.map(p => p.productId)
-    const dbProducts = await Product.findAll({
-      where: { id: productIds }
-    })
+  check('restaurantId')
+    .exists()
+    .withMessage('restaurantId is required')
+    .isInt()
+    .custom(async (value) => {
+      const restaurant = await Restaurant.findByPk(value)
+      if (!restaurant) throw new Error('Restaurant not found')
+    }),
 
-    const restaurantIdSet = new Set(dbProducts.map(p => p.restaurantId))
-    if (restaurantIdSet.size > 1) throw new Error('All products must belong to the same restaurant')
+  check('products')
+    .exists()
+    .isArray({ min: 1 })
+    .custom(async (products, { req }) => {
+      const productIds = products.map(p => p.productId)
 
-    if (req.body.restaurantId && !restaurantIdSet.has(req.body.restaurantId)) {
-      throw new Error('Products do not match the restaurantId in the body')
-    }
-  }),
-  check('products.*.productId').exists().isInt().custom(async (value) => {
-    const product = await Product.findByPk(value)
-    if (!product) throw new Error('Product does not exist')
-    if (!product.availability) throw new Error('Product not available')
-  }),
-  check('products.*.quantity').exists().isInt({ min: 1 })
+      const dbProducts = await Product.findAll({
+        where: { id: productIds }
+      })
+
+      // Validar que todos existen
+      if (dbProducts.length !== productIds.length) {
+        throw new Error('Product does not exist')
+      }
+
+      // Validar disponibilidad
+      if (dbProducts.some(p => !p.availability)) {
+        throw new Error('Product not available')
+      }
+
+      // Validar mismo restaurante
+      const restaurantIdSet = new Set(dbProducts.map(p => p.restaurantId))
+      if (restaurantIdSet.size > 1) {
+        throw new Error('All products must belong to the same restaurant')
+      }
+
+      if (req.body.restaurantId && !restaurantIdSet.has(req.body.restaurantId)) {
+        throw new Error('Products do not match the restaurantId in the body')
+      }
+
+      return true
+    }),
+
+  check('products.*.productId')
+    .exists()
+    .isInt(),
+
+  check('products.*.quantity')
+    .exists()
+    .isInt({ min: 1 }),
+  check('address')
+    .exists()
+    .isString()
+    .notEmpty()
 ]
 // TODO: Include validation rules for update that should:
 // 1. Check that restaurantId is NOT present in the body.
@@ -60,4 +90,4 @@ const update = [
   check('products.*.quantity').exists().isInt({ min: 1 })
 ]
 
-export { create, update }
+export default{ create, update }
