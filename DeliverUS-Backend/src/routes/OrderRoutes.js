@@ -4,6 +4,7 @@ import { checkEntityExists } from '../middlewares/EntityMiddleware.js'
 import * as OrderMiddleware from '../middlewares/OrderMiddleware.js'
 import { Order } from '../models/models.js'
 import * as OrderValidation from '../controllers/validation/OrderValidation.js'
+import { handleValidation } from '../middlewares/ValidationHandlingMiddleware.js'
 
 const loadFileRoutes = function (app) {
   // TODO: Include routes for:
@@ -21,6 +22,7 @@ const loadFileRoutes = function (app) {
       isLoggedIn,
       hasRole('customer'),
       OrderValidation.create,
+      handleValidation,
       OrderController.create)
   app.route('/orders/:orderId/confirm')
     .patch(
@@ -63,6 +65,7 @@ const loadFileRoutes = function (app) {
       hasRole('customer'),
       checkEntityExists(Order, 'orderId'),
       OrderValidation.update,
+      handleValidation,
       OrderMiddleware.checkOrderCustomer,
       OrderMiddleware.checkOrderIsPending, // Si ya esta confirmada o entregada no tienen sentido editarla
       OrderController.update)
