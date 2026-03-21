@@ -131,7 +131,7 @@ const create = async (req, res) => {
       totalPrice += dbProduct.price * item.quantity
     }
 
-    if (orderData.price <= 10) {
+    if (totalPrice <= 10) {
       shippingCosts = restaurant.shippingCosts
       totalPrice += shippingCosts
     }
