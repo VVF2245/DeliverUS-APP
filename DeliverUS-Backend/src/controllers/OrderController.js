@@ -124,7 +124,12 @@ const create = async (req, res) => {
     // Obtener restaurante para saber sus gastos de envío
     const restaurant = await Restaurant.findByPk(orderData.restaurantId)
     let shippingCosts = 0
-    let totalPrice = orderData.price
+    let totalPrice = 0
+
+    for (const item of orderData.products) {
+      const dbProduct = await Product.findByPk(item.productId)
+      totalPrice += dbProduct.price * item.quantity
+    }
 
     if (orderData.price <= 10) {
       shippingCosts = restaurant.shippingCosts
@@ -154,7 +159,21 @@ const create = async (req, res) => {
     // Confirmar transacción
     await transaction.commit()
 
-    res.status(200).json(order)
+    const createdOrder = await Order.findByPk(order.id, {
+      include: [
+        {
+          model: Product,
+          as: 'products',
+          through: { attributes: ['quantity', 'unityPrice'] }
+        },
+        {
+          model: Restaurant,
+          as: 'restaurant'
+        }
+      ]
+    })
+
+    res.status(200).json(createdOrder)
   } catch (error) {
     // Revertir si algo falla
     await transaction.rollback()
