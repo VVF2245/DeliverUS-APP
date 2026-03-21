@@ -3,7 +3,7 @@ import { hasRole, isLoggedIn } from '../middlewares/AuthMiddleware.js'
 import { checkEntityExists } from '../middlewares/EntityMiddleware.js'
 import * as OrderMiddleware from '../middlewares/OrderMiddleware.js'
 import { Order } from '../models/models.js'
-import OrderValidation from '../controllers/validation/OrderValidation.js'
+import * as OrderValidation from '../controllers/validation/OrderValidation.js'
 import { handleValidation } from '../middlewares/ValidationHandlingMiddleware.js'
 
 const loadFileRoutes = function (app) {

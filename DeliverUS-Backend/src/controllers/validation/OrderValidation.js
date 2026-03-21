@@ -90,4 +90,4 @@ const update = [
   check('products.*.quantity').exists().isInt({ min: 1 })
 ]
 
-export default{ create, update }
+export { create, update }
