@@ -64,11 +64,11 @@ const loadFileRoutes = function (app) {
     .put(
       isLoggedIn,
       hasRole('customer'),
+      OrderMiddleware.checkOrderCustomer,
       checkEntityExists(Order, 'orderId'),
+      OrderMiddleware.checkOrderIsPending,
       OrderValidation.update,
       handleValidation,
-      OrderMiddleware.checkOrderCustomer,
-      OrderMiddleware.checkOrderIsPending, // Si ya esta confirmada o entregada no tienen sentido editarla
       OrderController.update)
     .delete(
       isLoggedIn,

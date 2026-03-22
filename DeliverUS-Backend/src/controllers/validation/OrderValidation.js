@@ -69,25 +69,49 @@ const create = [
 // 5. Check that the order is in the 'pending' state.
 const update = [
   check('restaurantId').not().exists(),
-  check('products').exists().isArray({ min: 1 }).custom(async (products, { req }) => {
-    const order = await Order.findByPk(req.params.id)
-    const productIds = products.map(p => p.productId)
-    const dbProducts = await Product.findAll({
-      where: { id: productIds }
-    })
+  check('products')
+    .exists()
+    .isArray({ min: 1 })
+    .custom(async (products, { req }) => {
+      const productIds = products.map(p => p.productId)
+      const order = await Order.findByPk(req.params.orderId)
+      const dbProducts = await Product.findAll({
+        where: { id: productIds }
+      })
 
-    const restaurantIdSet = new Set(dbProducts.map(p => p.restaurantId))
-    if (restaurantIdSet.size > 1) throw new Error('All products must belong to the same restaurant')
+      // Validar que todos existen
+      if (dbProducts.length !== productIds.length) {
+        throw new Error('Product does not exist')
+      }
 
-    if (!order) throw new Error('Order not found')
-    if (order.getStatus() !== 'pending') throw new Error('Order must be pending to edit')
-  }),
-  check('products.*.productId').exists().isInt().custom(async (value) => {
-    const product = await Product.findByPk(value)
-    if (!product) throw new Error('Product does not exist')
-    if (!product.availability) throw new Error('Product not available')
-  }),
-  check('products.*.quantity').exists().isInt({ min: 1 })
+      // Validar disponibilidad
+      if (dbProducts.some(p => !p.availability)) {
+        throw new Error('Product not available')
+      }
+
+      // Validar mismo restaurante
+      const restaurantIdSet = new Set(dbProducts.map(p => p.restaurantId))
+      if (restaurantIdSet.size > 1) {
+        throw new Error('All products must belong to the same restaurant')
+      }
+
+      if (req.body.restaurantId && !restaurantIdSet.has(req.body.restaurantId)) {
+        throw new Error('Products do not match the restaurantId in the body')
+      }
+      if (order.getStatus() !== 'pending') throw new Error('Order must be pending to edit')
+    }),
+
+  check('products.*.productId')
+    .exists()
+    .isInt(),
+
+  check('products.*.quantity')
+    .exists()
+    .isInt({ min: 1 }),
+  check('address')
+    .exists()
+    .isString()
+    .notEmpty()
 ]
 
 export { create, update }

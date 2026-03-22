@@ -194,48 +194,46 @@ const update = async function (req, res) {
     const orderData = req.body
     const orderId = req.params.orderId
 
-    // Obtener el restaurante para calcular gastos de envío
-    const restaurant = await Restaurant.findByPk(orderData.restaurantId)
+    // Obtener la orden con restaurante
+    const order = await Order.findByPk(orderId, {
+      include: [{ model: Restaurant, as: 'restaurant' }],
+      transaction
+    })
 
-    if (!restaurant) {
-      await transaction.rollback()
-      return res.status(404).json({ error: 'Restaurant not found' })
+    const restaurant = order.restaurant
+
+    // Calcular precio total
+    let totalPrice = 0
+    for (const item of orderData.products) {
+      const dbProduct = await Product.findByPk(item.productId)
+      totalPrice += dbProduct.price * item.quantity
     }
 
-    // Calcular gastos de envío y precio total
+    // Calcular shippingCosts según reglas
     let shippingCosts = 0
-    let totalPrice = orderData.price
-
-    if (orderData.price <= 10) {
+    if (totalPrice <= 10) {
       shippingCosts = restaurant.shippingCosts
       totalPrice += shippingCosts
     }
 
-    // Obtener la orden existente
-    const order = await Order.findByPk(orderId, { transaction })
+    // Actualizar orden
+    await order.update(
+      {
+        price: totalPrice,
+        address: orderData.address,
+        shippingCosts
+      },
+      { transaction }
+    )
 
-    if (!order) {
-      await transaction.rollback()
-      return res.status(404).json({ error: 'Order not found' })
-    }
-
-    // Actualizar datos de la orden
-    await order.update({
-      price: totalPrice,
-      address: orderData.address,
-      restaurantId: orderData.restaurantId,
-      shippingCosts
-    }, { transaction })
-
-    // Eliminar productos antiguos relacionados
+    // Reemplazar productos
     await order.setProducts([], { transaction })
-
-    // Crear nuevas líneas de productos
-    for (const product of orderData.products) {
-      await order.addProduct(product.productId, {
+    for (const item of orderData.products) {
+      const dbProduct = await Product.findByPk(item.productId)
+      await order.addProduct(dbProduct, {
         through: {
-          quantity: product.quantity,
-          unityPrice: product.unityPrice
+          quantity: item.quantity,
+          unityPrice: dbProduct.price
         },
         transaction
       })
@@ -243,12 +241,13 @@ const update = async function (req, res) {
 
     // Confirmar transacción
     await transaction.commit()
-
-    res.status(200).json(order)
+    const updatedOrder = await Order.findByPk(order.id, {
+      include: [{ model: Product, as: 'products' }]
+    })
+    res.status(200).json(updatedOrder)
   } catch (error) {
-    // Revertir transacción en caso de error
     await transaction.rollback()
-    res.status(500).json({ error: error.message })
+    res.status(500).json({ error: error.message, stack: error.stack }) // stack temporal para tests
   }
 }
 // TODO: Implement the destroy function that receives an orderId as path param and removes the associated order from the database.
@@ -272,6 +271,7 @@ const destroy = async function (req, res) {
     await order.destroy({ transaction })
 
     // Confirmar transacción
+
     await transaction.commit()
 
     res.status(200).json({ message: 'Order deleted successfully' })
