@@ -1,10 +1,45 @@
-import React from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { StyleSheet, View, Pressable } from 'react-native'
+
+import { getUserOrders } from '../../api/OrderEndpoints'
 import TextRegular from '../../components/TextRegular'
 import TextSemiBold from '../../components/TextSemiBold'
 import { brandPrimary, brandPrimaryTap } from '../../styles/GlobalStyles'
+import * as GlobalStyles from '../../styles/GlobalStyles'
+import { AuthorizationContext } from '../../../../DeliverUS-Frontend-Owner/src/context/AuthorizationContext'
+import { showMessage } from 'react-native-flash-message'
 
 export default function OrdersScreen({ navigation }) {
+  const [orders, setOrders] = useState([])
+  const { loggedInUser } = useContext(AuthorizationContext)
+
+  useEffect(() => {
+    if (loggedInUser) {
+      fetchOrders()
+    } else {
+      setOrders(null)
+    }
+  }, [loggedInUser, route])
+
+  const renderOrder = ({ item }) => {
+    return ()
+  }
+
+  const fetchOrders = async () => {
+    try {
+      const fetchedOrders = await getUserOrders()
+      setOrders(fetchedOrders)
+    } catch (error) {
+      showMessage({
+        message: `There was an error while retrieving orders. ${error} `,
+        type: 'error',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    }
+  }
+
+
   return (
     <View style={styles.container}>
       <View style={styles.FRHeader}>
