@@ -1,17 +1,68 @@
-import { useEffect } from 'react'
-import { StyleSheet, View, Pressable } from 'react-native'
+import { useEffect, useState } from 'react'
+import { StyleSheet, View, Pressable, FlatList } from 'react-native'
 import TextSemiBold from '../../components/TextSemiBold'
 import TextRegular from '../../components/TextRegular'
+import { getAll, remove } from '../../api/RestaurantEndpoints'
+import { showMessage } from 'react-native-flash-message'
 import * as GlobalStyles from '../../styles/GlobalStyles' //Imported globally to practise a different import style unlike that of RestaurantDetailScreen
+import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
+import { API_BASE_URL } from '@env'
+import ImageCard from '../../components/ImageCard'
 
 export default function RestaurantsScreen({ navigation, route }) {
   // TODO: Create a state for storing the restaurants
 
+  const [restaurants, setRestaurants] = useState([])
+
+  const fetchRestaurants = async () => {
+    try {
+      const fetchedRestaurants = await getAll()
+      setRestaurants(fetchedRestaurants)
+    } catch (error) {
+      showMessage({
+        message: `There was an error while retrieving restaurants. ${error} `,
+        type: 'error',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    }
+  }
   useEffect(() => {
     // TODO: Fetch all restaurants and set them to state.
     //      Notice that it is not required to be logged in.
     // TODO: set restaurants to state
+    fetchRestaurants()
   }, [route])
+
+  const renderRestaurantWithImageCard = ({ item }) => {
+    return (
+      <ImageCard
+        imageUri={
+          item.logo ? { uri: API_BASE_URL + '/' + item.logo } : restaurantLogo
+        }
+        title={item.name}
+        onPress={() => {
+          navigation.navigate('RestaurantDetailScreen', { id: item.id })
+        }}
+      >
+        <TextRegular numberOfLines={2}>{item.description}</TextRegular>
+        {item.averageServiceMinutes !== null && (
+          <TextSemiBold>
+            Avg. service time:{' '}
+            <TextSemiBold textStyle={{ color: GlobalStyles.brandPrimary }}>
+              {item.averageServiceMinutes} min.
+            </TextSemiBold>
+          </TextSemiBold>
+        )}
+        <TextSemiBold>
+          Shipping:{' '}
+          <TextSemiBold textStyle={{ color: GlobalStyles.brandPrimary }}>
+            {item.shippingCosts.toFixed(2)}€
+          </TextSemiBold>
+        </TextSemiBold>
+      </ImageCard>
+    )
+  }
 
   return (
     <View style={styles.container}>
@@ -28,6 +79,11 @@ export default function RestaurantsScreen({ navigation, route }) {
           sellers.
         </TextRegular>
       </View>
+      <FlatList
+        data={restaurants}
+        renderItem={renderRestaurantWithImageCard}
+        keyExtractor={item => item.id.toString()}
+      />
       <Pressable
         onPress={() => {
           navigation.navigate('RestaurantDetailScreen', { id: 1 }) // TODO: Change this to the actual restaurant id as they are rendered as a FlatList
