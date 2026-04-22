@@ -1,17 +1,66 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { StyleSheet, View, Pressable } from 'react-native'
 import TextSemiBold from '../../components/TextSemiBold'
 import TextRegular from '../../components/TextRegular'
+import { getPopularProducts } from '../../api/ProductEndpoints'
 import * as GlobalStyles from '../../styles/GlobalStyles' //Imported globally to practise a different import style unlike that of RestaurantDetailScreen
+import { FlatList } from 'react-native'
+import ImageCard from '../../components/ImageCard'
+import { showMessage } from 'react-native-flash-message'
+
+import defaultProductImage from '../../../assets/product.jpeg'
+import { API_BASE_URL } from '@env'
 
 export default function RestaurantsScreen({ navigation, route }) {
   // TODO: Create a state for storing the restaurants
-
+  const [top3Products, setTop3Products] = useState([])
+  const fetchTop3Products = async () => {
+    try {
+      const popularProducts = await getPopularProducts()
+      setTop3Products(popularProducts)
+    } catch (error) {
+      showMessage({
+        message: `There was an error while retrieving restaurant details (id ${route.params.id}). ${error}`,
+        type: 'error',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    }
+  }
   useEffect(() => {
     // TODO: Fetch all restaurants and set them to state.
     //      Notice that it is not required to be logged in.
     // TODO: set restaurants to state
+    fetchTop3Products()
   }, [route])
+
+  const renderPopularProducts = ({ item }) => {
+    return (
+      <ImageCard
+        imageUri={
+          item.image
+            ? { uri: API_BASE_URL + '/' + item.image }
+            : defaultProductImage
+        }
+        title={item.name}
+        onPress={() => {
+          navigation.navigate('RestaurantDetailScreen', {
+            id: item.restaurantId
+          })
+        }}
+      >
+        <TextRegular numberOfLines={2}>{item.description}</TextRegular>
+        <TextSemiBold textStyle={styles.price}>
+          {item.price.toFixed(2)}€
+        </TextSemiBold>
+        {!item.availability && (
+          <TextRegular textStyle={styles.availability}>
+            Not available
+          </TextRegular>
+        )}
+      </ImageCard>
+    )
+  }
 
   return (
     <View style={styles.container}>
@@ -28,6 +77,11 @@ export default function RestaurantsScreen({ navigation, route }) {
           sellers.
         </TextRegular>
       </View>
+      <FlatList
+        data={top3Products}
+        renderItem={renderPopularProducts}
+        keyExtractor={item => item.id.toString()}
+      />
       <Pressable
         onPress={() => {
           navigation.navigate('RestaurantDetailScreen', { id: 1 }) // TODO: Change this to the actual restaurant id as they are rendered as a FlatList
