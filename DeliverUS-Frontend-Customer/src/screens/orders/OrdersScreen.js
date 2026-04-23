@@ -69,6 +69,7 @@ export default function OrdersScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <FlatList
+        style={styles.container}
         data={orders}
         renderItem={renderOrder}
         keyExtractor={item => item.id.toString()}
