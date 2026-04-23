@@ -8,7 +8,7 @@ import { brandPrimary, brandPrimaryTap } from '../../styles/GlobalStyles'
 import * as GlobalStyles from '../../styles/GlobalStyles'
 import { AuthorizationContext } from '../../../../DeliverUS-Frontend-Owner/src/context/AuthorizationContext'
 import { showMessage } from 'react-native-flash-message'
-import ImageCard from '../../../../DeliverUS-Frontend-Owner/src/components/ImageCard'´
+import ImageCard from '../../../../DeliverUS-Frontend-Owner/src/components/ImageCard'
 import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
 import { API_BASE_URL } from '@env'
 
@@ -71,7 +71,7 @@ export default function OrdersScreen({ navigation }) {
       <FlatList
         data={orders}
         renderItem={renderOrder}
-        keyExtractor={item=> item.id.toString()}
+        keyExtractor={item => item.id.toString()}
         ListEmptyComponent={renderEmptyOrdersList}
       />
       <View style={styles.FRHeader}>
