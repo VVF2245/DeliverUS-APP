@@ -20,9 +20,9 @@ export default function OrdersScreen({ navigation }) {
     if (loggedInUser) {
       fetchOrders()
     } else {
-      setOrders(null)
+      setOrders([])
     }
-  }, [loggedInUser, route])
+  }, [loggedInUser])
 
   const renderOrder = ({ item }) => {
     return (
