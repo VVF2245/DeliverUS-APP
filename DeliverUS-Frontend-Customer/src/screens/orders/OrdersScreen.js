@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react'
-import { StyleSheet, View, Pressable } from 'react-native'
+import { StyleSheet, View, Pressable, FlatList } from 'react-native'
 
 import { getUserOrders } from '../../api/OrderEndpoints'
 import TextRegular from '../../components/TextRegular'
@@ -8,6 +8,9 @@ import { brandPrimary, brandPrimaryTap } from '../../styles/GlobalStyles'
 import * as GlobalStyles from '../../styles/GlobalStyles'
 import { AuthorizationContext } from '../../../../DeliverUS-Frontend-Owner/src/context/AuthorizationContext'
 import { showMessage } from 'react-native-flash-message'
+import ImageCard from '../../../../DeliverUS-Frontend-Owner/src/components/ImageCard'´
+import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
+import { API_BASE_URL } from '@env'
 
 export default function OrdersScreen({ navigation }) {
   const [orders, setOrders] = useState([])
@@ -22,7 +25,31 @@ export default function OrdersScreen({ navigation }) {
   }, [loggedInUser, route])
 
   const renderOrder = ({ item }) => {
-    return ()
+    return (
+      <ImageCard
+        imageUri={
+          item.restaurant?.logo
+            ? { uri: API_BASE_URL + '/' + item.restaurant.logo }
+            : restaurantLogo
+        }
+        title={item.restaurant?.name}
+        onPress={() => {
+          navigation.navigate('OrderDetailScreen', { id: item.id })
+        }}
+      >
+        <TextRegular>Status: {item.status}</TextRegular>
+
+        <TextSemiBold>{item.total?.toFixed(2)} €</TextSemiBold>
+      </ImageCard>
+    )
+  }
+
+  const renderEmptyOrdersList = () => {
+    return (
+      <TextRegular textStyle={styles.emptyList}>
+        No orders were retreived. Have you ordered yet?
+      </TextRegular>
+    )
   }
 
   const fetchOrders = async () => {
@@ -39,15 +66,15 @@ export default function OrdersScreen({ navigation }) {
     }
   }
 
-
   return (
     <View style={styles.container}>
+      <FlatList
+        data={orders}
+        renderItem={renderOrder}
+        keyExtractor={item=> item.id.toString()}
+        ListEmptyComponent={renderEmptyOrdersList}
+      />
       <View style={styles.FRHeader}>
-        <TextSemiBold>FR5: Listing my confirmed orders</TextSemiBold>
-        <TextRegular>
-          A Customer will be able to check his/her confirmed orders, sorted from
-          the most recent to the oldest.
-        </TextRegular>
         <TextSemiBold>FR8: Edit/delete order</TextSemiBold>
         <TextRegular>
           If the order is in the state pending, the customer can edit or remove
