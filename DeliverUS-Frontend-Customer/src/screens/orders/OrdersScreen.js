@@ -55,7 +55,7 @@ export default function OrdersScreen({ navigation }) {
   const fetchOrders = async () => {
     try {
       const fetchedOrders = await getUserOrders()
-      setOrders(fetchedOrders)
+      setOrders(Array.isArray(fetchOrders) ? fetchedOrders : [])
     } catch (error) {
       showMessage({
         message: `There was an error while retrieving orders. ${error} `,
@@ -67,7 +67,7 @@ export default function OrdersScreen({ navigation }) {
   }
 
   return (
-    <View style={styles.container}>
+    <>
       <FlatList
         style={styles.container}
         data={orders}
@@ -75,15 +75,6 @@ export default function OrdersScreen({ navigation }) {
         keyExtractor={item => item.id.toString()}
         ListEmptyComponent={renderEmptyOrdersList}
       />
-      <View style={styles.FRHeader}>
-        <TextSemiBold>FR8: Edit/delete order</TextSemiBold>
-        <TextRegular>
-          If the order is in the state pending, the customer can edit or remove
-          the products included or remove the whole order. The delivery address
-          can also be modified in the state pending. If the order is in the
-          state sent or delivered no edition is allowed.
-        </TextRegular>
-      </View>
       <Pressable
         onPress={() => {
           navigation.navigate('OrderDetailScreen', {
@@ -101,7 +92,7 @@ export default function OrdersScreen({ navigation }) {
           Go to Order Detail Screen
         </TextRegular>
       </Pressable>
-    </View>
+    </>
   )
 }
 
