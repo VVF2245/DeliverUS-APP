@@ -113,27 +113,19 @@ export default function RestaurantsScreen({ navigation, route }) {
   return (
     <View style={styles.container}>
       <View style={styles.FRHeader}>
-        <TextSemiBold>FR1: Restaurants listing.</TextSemiBold>
-        <TextRegular>
-          List restaurants and enable customers to navigate to restaurant
-          details so they can create and place a new order
-        </TextRegular>
-        <TextSemiBold>FR7: Show top 3 products.</TextSemiBold>
-        <TextRegular>
-          Customers will be able to query top 3 products from all restaurants.
-          Top products are the most popular ones, in other words the best
-          sellers.
-        </TextRegular>
+        <TextSemiBold style={[styles.title, { fontSize: 24 }]}>
+          Restaurants list
+        </TextSemiBold>
       </View>
-      <ScrollView>
+      <View style={styles.section}>
         <FlatList
           data={restaurants}
           renderItem={renderRestaurantWithImageCard}
           keyExtractor={item => item.id.toString()}
         />
-        <TextSemiBold
-          style={{ marginTop: 40, marginBottom: 10, marginLeft: 15 }}
-        >
+      </View>
+      <View style={styles.section}>
+        <TextSemiBold style={[styles.title, { fontSize: 18, color: 'green' }]}>
           Top 3 Popular Products
         </TextSemiBold>
         <FlatList
@@ -141,7 +133,8 @@ export default function RestaurantsScreen({ navigation, route }) {
           renderItem={renderPopularProducts}
           keyExtractor={item => item.id.toString()}
         />
-      </ScrollView>
+      </View>
+
       <Pressable
         onPress={() => {
           navigation.navigate('RestaurantDetailScreen', { id: 1 }) // TODO: Change this to the actual restaurant id as they are rendered as a FlatList
@@ -191,5 +184,19 @@ const styles = StyleSheet.create({
   emptyList: {
     textAlign: 'center',
     padding: 50
+  },
+  // estilos creados para mejorar el aspecto final de la pagina
+  section: {
+    flex: 1,
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc'
+  },
+  title: {
+    fontWeight: 'bold',
+    color: '#333',
+    textTransform: 'uppercase', // Les da un toque más elegante
+    letterSpacing: 1,
+    textAlign: 'center'
   }
 })
