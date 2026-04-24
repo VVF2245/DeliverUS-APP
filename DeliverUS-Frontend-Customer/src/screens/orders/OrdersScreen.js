@@ -24,6 +24,38 @@ export default function OrdersScreen({ navigation }) {
     }
   }, [loggedInUser])
 
+  /*
+MOCK useEffect
+  useEffect(() => {
+    setOrders([
+      {
+        id: 1,
+        createdAt: new Date(),
+        price: 12.5,
+        shippingCosts: 2,
+        address: 'Calle Falsa 123',
+        status: 'pending',
+        restaurant: {
+          name: 'Burger King',
+          logo: null
+        }
+      },
+      {
+        id: 2,
+        createdAt: new Date(),
+        price: 25.99,
+        shippingCosts: 0,
+        address: 'Av. Canarias 45',
+        status: 'sent',
+        restaurant: {
+          name: 'Telepizza',
+          logo: null
+        }
+      }
+    ])
+  }, [])
+*/
+
   const renderOrder = ({ item }) => {
     return (
       <ImageCard
@@ -39,7 +71,7 @@ export default function OrdersScreen({ navigation }) {
       >
         <TextRegular>Status: {item.status}</TextRegular>
 
-        <TextSemiBold>{item.total?.toFixed(2)} €</TextSemiBold>
+        <TextSemiBold>{item.price?.toFixed(2)} €</TextSemiBold>
       </ImageCard>
     )
   }
@@ -55,7 +87,7 @@ export default function OrdersScreen({ navigation }) {
   const fetchOrders = async () => {
     try {
       const fetchedOrders = await getUserOrders()
-      setOrders(Array.isArray(fetchOrders) ? fetchedOrders : [])
+      setOrders(Array.isArray(fetchedOrders) ? fetchedOrders : [])
     } catch (error) {
       showMessage({
         message: `There was an error while retrieving orders. ${error} `,
@@ -97,17 +129,8 @@ export default function OrdersScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  FRHeader: {
-    // TODO: remove this style and the related <View>. Only for clarification purposes
-    justifyContent: 'center',
-    alignItems: 'left',
-    margin: 50
-  },
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 50
+    flex: 1
   },
   button: {
     borderRadius: 8,
