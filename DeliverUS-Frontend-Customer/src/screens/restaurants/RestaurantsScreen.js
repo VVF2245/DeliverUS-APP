@@ -21,6 +21,28 @@ export default function RestaurantsScreen({ navigation, route }) {
     } catch (error) {
       showMessage({
         message: `There was an error while retrieving restaurant details (id ${route.params.id}). ${error}`,
+import { StyleSheet, View, Pressable, FlatList } from 'react-native'
+import TextSemiBold from '../../components/TextSemiBold'
+import TextRegular from '../../components/TextRegular'
+import { getAll, remove } from '../../api/RestaurantEndpoints'
+import { showMessage } from 'react-native-flash-message'
+import * as GlobalStyles from '../../styles/GlobalStyles' //Imported globally to practise a different import style unlike that of RestaurantDetailScreen
+import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
+import { API_BASE_URL } from '@env'
+import ImageCard from '../../components/ImageCard'
+
+export default function RestaurantsScreen({ navigation, route }) {
+  // TODO: Create a state for storing the restaurants
+
+  const [restaurants, setRestaurants] = useState([])
+
+  const fetchRestaurants = async () => {
+    try {
+      const fetchedRestaurants = await getAll()
+      setRestaurants(fetchedRestaurants)
+    } catch (error) {
+      showMessage({
+        message: `There was an error while retrieving restaurants. ${error} `,
         type: 'error',
         style: GlobalStyles.flashStyle,
         titleStyle: GlobalStyles.flashTextStyle
@@ -58,6 +80,35 @@ export default function RestaurantsScreen({ navigation, route }) {
             Not available
           </TextRegular>
         )}
+    fetchRestaurants()
+  }, [route])
+
+  const renderRestaurantWithImageCard = ({ item }) => {
+    return (
+      <ImageCard
+        imageUri={
+          item.logo ? { uri: API_BASE_URL + '/' + item.logo } : restaurantLogo
+        }
+        title={item.name}
+        onPress={() => {
+          navigation.navigate('RestaurantDetailScreen', { id: item.id })
+        }}
+      >
+        <TextRegular numberOfLines={2}>{item.description}</TextRegular>
+        {item.averageServiceMinutes !== null && (
+          <TextSemiBold>
+            Avg. service time:{' '}
+            <TextSemiBold textStyle={{ color: GlobalStyles.brandPrimary }}>
+              {item.averageServiceMinutes} min.
+            </TextSemiBold>
+          </TextSemiBold>
+        )}
+        <TextSemiBold>
+          Shipping:{' '}
+          <TextSemiBold textStyle={{ color: GlobalStyles.brandPrimary }}>
+            {item.shippingCosts.toFixed(2)}€
+          </TextSemiBold>
+        </TextSemiBold>
       </ImageCard>
     )
   }
@@ -80,6 +131,8 @@ export default function RestaurantsScreen({ navigation, route }) {
       <FlatList
         data={top3Products}
         renderItem={renderPopularProducts}
+        data={restaurants}
+        renderItem={renderRestaurantWithImageCard}
         keyExtractor={item => item.id.toString()}
       />
       <Pressable
