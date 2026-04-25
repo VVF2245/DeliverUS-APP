@@ -78,9 +78,13 @@ MOCK useEffect
 
   const renderEmptyOrdersList = () => {
     return (
-      <TextRegular textStyle={styles.emptyList}>
-        No orders were retreived. Have you ordered yet?
-      </TextRegular>
+      <View style={styles.emptyContainer}>
+        <TextRegular textStyle={styles.emptyTitle}>No orders yet</TextRegular>
+
+        <TextRegular textStyle={styles.emptyText}>
+          When you place an order it will appear here.
+        </TextRegular>
+      </View>
     )
   }
 
@@ -143,5 +147,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'white',
     textAlign: 'center'
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  emptyTitle: {
+    fontSize: 20,
+    marginTop: 20,
+    marginBottom: 10,
+    textAlign: 'center'
+  },
+  emptyText: {
+    textAlign: 'center',
+    marginBottom: 20,
+    opacity: 0.7
   }
 })
