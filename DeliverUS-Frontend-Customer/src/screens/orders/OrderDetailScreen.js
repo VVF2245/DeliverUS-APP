@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { FlatList, StyleSheet, View } from 'react-native'
 import TextRegular from '../../components/TextRegular'
 import TextSemiBold from '../../components/TextSemiBold'
@@ -6,7 +6,9 @@ import TextSemiBold from '../../components/TextSemiBold'
 export default function OrderDetailScreen({ navigation, route }) {
   useEffect(() => {}, [route])
 
-  const [order, setOrder] = useState({})
+  const [order, setOrder] = useState({
+    createdAt: new Date()
+  })
 
   const renderHeader = () => {
     return (
@@ -36,7 +38,7 @@ export default function OrderDetailScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <FlatList ListHeaderComponent={renderHeader} />
+      <FlatList style={styles.container} ListHeaderComponent={renderHeader} />
     </View>
   )
 }
