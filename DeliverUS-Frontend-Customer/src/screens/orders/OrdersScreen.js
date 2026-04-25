@@ -1,26 +1,112 @@
-import React from 'react'
-import { StyleSheet, View, Pressable } from 'react-native'
+import { useContext, useEffect, useState } from 'react'
+import { StyleSheet, View, Pressable, FlatList } from 'react-native'
+
+import { getUserOrders } from '../../api/OrderEndpoints'
 import TextRegular from '../../components/TextRegular'
 import TextSemiBold from '../../components/TextSemiBold'
 import { brandPrimary, brandPrimaryTap } from '../../styles/GlobalStyles'
+import * as GlobalStyles from '../../styles/GlobalStyles'
+import { AuthorizationContext } from '../../context/AuthorizationContext'
+import { showMessage } from 'react-native-flash-message'
+import ImageCard from '../../components/ImageCard'
+import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
+import { API_BASE_URL } from '@env'
 
 export default function OrdersScreen({ navigation }) {
+  const [orders, setOrders] = useState([])
+  const { loggedInUser } = useContext(AuthorizationContext)
+
+  useEffect(() => {
+    if (loggedInUser) {
+      fetchOrders()
+    } else {
+      setOrders([])
+    }
+  }, [loggedInUser])
+
+  /*
+MOCK useEffect
+  useEffect(() => {
+    setOrders([
+      {
+        id: 1,
+        createdAt: new Date(),
+        price: 12.5,
+        shippingCosts: 2,
+        address: 'Calle Falsa 123',
+        status: 'pending',
+        restaurant: {
+          name: 'Burger King',
+          logo: null
+        }
+      },
+      {
+        id: 2,
+        createdAt: new Date(),
+        price: 25.99,
+        shippingCosts: 0,
+        address: 'Av. Canarias 45',
+        status: 'sent',
+        restaurant: {
+          name: 'Telepizza',
+          logo: null
+        }
+      }
+    ])
+  }, [])
+*/
+
+  const renderOrder = ({ item }) => {
+    return (
+      <ImageCard
+        imageUri={
+          item.restaurant?.logo
+            ? { uri: API_BASE_URL + '/' + item.restaurant.logo }
+            : restaurantLogo
+        }
+        title={item.restaurant?.name}
+        onPress={() => {
+          navigation.navigate('OrderDetailScreen', { id: item.id })
+        }}
+      >
+        <TextRegular>Status: {item.status}</TextRegular>
+
+        <TextSemiBold>{item.price?.toFixed(2)} €</TextSemiBold>
+      </ImageCard>
+    )
+  }
+
+  const renderEmptyOrdersList = () => {
+    return (
+      <TextRegular textStyle={styles.emptyList}>
+        No orders were retreived. Have you ordered yet?
+      </TextRegular>
+    )
+  }
+
+  const fetchOrders = async () => {
+    try {
+      const fetchedOrders = await getUserOrders()
+      setOrders(Array.isArray(fetchedOrders) ? fetchedOrders : [])
+    } catch (error) {
+      showMessage({
+        message: `There was an error while retrieving orders. ${error} `,
+        type: 'error',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    }
+  }
+
   return (
-    <View style={styles.container}>
-      <View style={styles.FRHeader}>
-        <TextSemiBold>FR5: Listing my confirmed orders</TextSemiBold>
-        <TextRegular>
-          A Customer will be able to check his/her confirmed orders, sorted from
-          the most recent to the oldest.
-        </TextRegular>
-        <TextSemiBold>FR8: Edit/delete order</TextSemiBold>
-        <TextRegular>
-          If the order is in the state pending, the customer can edit or remove
-          the products included or remove the whole order. The delivery address
-          can also be modified in the state pending. If the order is in the
-          state sent or delivered no edition is allowed.
-        </TextRegular>
-      </View>
+    <>
+      <FlatList
+        style={styles.container}
+        data={orders}
+        renderItem={renderOrder}
+        keyExtractor={item => item.id.toString()}
+        ListEmptyComponent={renderEmptyOrdersList}
+      />
       <Pressable
         onPress={() => {
           navigation.navigate('OrderDetailScreen', {
@@ -38,22 +124,13 @@ export default function OrdersScreen({ navigation }) {
           Go to Order Detail Screen
         </TextRegular>
       </Pressable>
-    </View>
+    </>
   )
 }
 
 const styles = StyleSheet.create({
-  FRHeader: {
-    // TODO: remove this style and the related <View>. Only for clarification purposes
-    justifyContent: 'center',
-    alignItems: 'left',
-    margin: 50
-  },
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 50
+    flex: 1
   },
   button: {
     borderRadius: 8,

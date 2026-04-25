@@ -1,31 +1,61 @@
 import { useEffect } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { FlatList, StyleSheet, View } from 'react-native'
 import TextRegular from '../../components/TextRegular'
 import TextSemiBold from '../../components/TextSemiBold'
 
 export default function OrderDetailScreen({ navigation, route }) {
   useEffect(() => {}, [route])
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.FRHeader}>
-        <TextSemiBold>FR6: Show order details</TextSemiBold>
-        <TextRegular>
-          A customer will be able to look his/her orders up. The system should
-          provide all details of an order, including the ordered products and
-          their prices.
+  const [order, setOrder] = useState({})
+
+  const renderHeader = () => {
+    return (
+      <View style={styles.headerContainer}>
+        <TextSemiBold textStyle={styles.textTitle}>
+          Order #{order.id}
+        </TextSemiBold>
+
+        <TextRegular textStyle={styles.text}>
+          {new Date(order.createdAt).toLocaleString()}
+        </TextRegular>
+
+        <TextRegular textStyle={styles.text}>
+          {new Date(order.createdAt).toLocaleString()}
+        </TextRegular>
+
+        <TextRegular textStyle={styles.text}>
+          {new Date(order.createdAt).toLocaleString()}
+        </TextRegular>
+
+        <TextRegular textStyle={styles.text}>
+          {new Date(order.createdAt).toLocaleString()}
         </TextRegular>
       </View>
+    )
+  }
+
+  return (
+    <View style={styles.container}>
+      <FlatList ListHeaderComponent={renderHeader} />
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  FRHeader: {
-    // TODO: remove this style and the related <View>. Only for clarification purposes
+  headerContainer: {
     justifyContent: 'center',
     alignItems: 'left',
     margin: 50
+  },
+  textTitle: {
+    fontSize: 20,
+    color: 'white'
+  },
+  text: {
+    fontSize: 16,
+    color: 'white',
+    alignSelf: 'center',
+    marginLeft: 5
   },
   container: {
     flex: 1,
