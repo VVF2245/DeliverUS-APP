@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { StyleSheet, View, Pressable, ScrollView } from 'react-native'
+import { StyleSheet, View, ScrollView } from 'react-native'
 import TextSemiBold from '../../components/TextSemiBold'
 import TextRegular from '../../components/TextRegular'
 import { getAll } from '../../api/RestaurantEndpoints'
@@ -142,23 +142,6 @@ export default function RestaurantsScreen({ navigation, route }) {
           keyExtractor={item => item.id.toString()}
         />
       </ScrollView>
-      <Pressable
-        onPress={() => {
-          navigation.navigate('RestaurantDetailScreen', { id: 1 }) // TODO: Change this to the actual restaurant id as they are rendered as a FlatList
-        }}
-        style={({ pressed }) => [
-          {
-            backgroundColor: pressed
-              ? GlobalStyles.brandPrimaryTap
-              : GlobalStyles.brandPrimary
-          },
-          styles.button
-        ]}
-      >
-        <TextRegular textStyle={styles.text}>
-          Go to Restaurant Detail Screen
-        </TextRegular>
-      </Pressable>
     </View>
   )
 }
@@ -176,20 +159,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     margin: 50
   },
-  button: {
-    borderRadius: 8,
-    height: 40,
-    margin: 12,
-    padding: 10,
-    width: '100%'
-  },
-  text: {
-    fontSize: 16,
-    color: 'white',
-    textAlign: 'center'
-  },
   emptyList: {
     textAlign: 'center',
     padding: 50
+  },
+  price: {
+    color: GlobalStyles.brandPrimary
+  },
+  availability: {
+    color: GlobalStyles.brandSecondary
   }
 })

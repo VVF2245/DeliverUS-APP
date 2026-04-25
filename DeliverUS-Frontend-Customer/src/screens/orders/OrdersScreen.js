@@ -1,8 +1,7 @@
 import React from 'react'
-import { StyleSheet, View, Pressable } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import TextRegular from '../../components/TextRegular'
 import TextSemiBold from '../../components/TextSemiBold'
-import { brandPrimary, brandPrimaryTap } from '../../styles/GlobalStyles'
 
 export default function OrdersScreen({ navigation }) {
   return (
@@ -21,23 +20,6 @@ export default function OrdersScreen({ navigation }) {
           state sent or delivered no edition is allowed.
         </TextRegular>
       </View>
-      <Pressable
-        onPress={() => {
-          navigation.navigate('OrderDetailScreen', {
-            id: Math.floor(Math.random() * 100)
-          })
-        }}
-        style={({ pressed }) => [
-          {
-            backgroundColor: pressed ? brandPrimaryTap : brandPrimary
-          },
-          styles.button
-        ]}
-      >
-        <TextRegular textStyle={styles.text}>
-          Go to Order Detail Screen
-        </TextRegular>
-      </Pressable>
     </View>
   )
 }
@@ -54,17 +36,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     margin: 50
-  },
-  button: {
-    borderRadius: 8,
-    height: 40,
-    margin: 12,
-    padding: 10,
-    width: '100%'
-  },
-  text: {
-    fontSize: 16,
-    color: 'white',
-    textAlign: 'center'
   }
 })

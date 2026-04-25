@@ -1,13 +1,16 @@
 import React from 'react'
 import AppContextProvider from './src/context/AppContext'
 import AuthorizationContextProvider from './src/context/AuthorizationContext'
+import CartContextProvider from './src/context/CartContext'
 import Layout from './src/screens/Layout'
 
 export default function App() {
   return (
     <AppContextProvider>
       <AuthorizationContextProvider>
-        <Layout />
+        <CartContextProvider>
+          <Layout />
+        </CartContextProvider>
       </AuthorizationContextProvider>
     </AppContextProvider>
   )
