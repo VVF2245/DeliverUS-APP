@@ -114,44 +114,34 @@ export default function RestaurantsScreen({ navigation, route }) {
     <View style={styles.container}>
       <View style={styles.FRHeader}>
         <TextSemiBold style={[styles.title, { fontSize: 24 }]}>
-          Restaurants list
+          Pick your favourite restaurant
         </TextSemiBold>
       </View>
-      <View style={styles.section}>
+      <View
+        style={[
+          styles.section,
+          { flex: 2, borderBottomWidth: 1, borderBottomColor: '#ccc' }
+        ]}
+      >
         <FlatList
           data={restaurants}
           renderItem={renderRestaurantWithImageCard}
           keyExtractor={item => item.id.toString()}
+          showsVerticalScrollIndicator={false}
         />
       </View>
-      <View style={styles.section}>
-        <TextSemiBold style={[styles.title, { fontSize: 18, color: 'green' }]}>
-          Top 3 Popular Products
+      <View style={[styles.section, { flex: 1 }]}>
+        <TextSemiBold style={[styles.title, { fontSize: 16, color: 'green' }]}>
+          Trending at Restaurants
         </TextSemiBold>
         <FlatList
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
           data={top3Products}
           renderItem={renderPopularProducts}
           keyExtractor={item => item.id.toString()}
         />
       </View>
-
-      <Pressable
-        onPress={() => {
-          navigation.navigate('RestaurantDetailScreen', { id: 1 }) // TODO: Change this to the actual restaurant id as they are rendered as a FlatList
-        }}
-        style={({ pressed }) => [
-          {
-            backgroundColor: pressed
-              ? GlobalStyles.brandPrimaryTap
-              : GlobalStyles.brandPrimary
-          },
-          styles.button
-        ]}
-      >
-        <TextRegular textStyle={styles.text}>
-          Go to Restaurant Detail Screen
-        </TextRegular>
-      </Pressable>
     </View>
   )
 }
@@ -187,16 +177,16 @@ const styles = StyleSheet.create({
   },
   // estilos creados para mejorar el aspecto final de la pagina
   section: {
-    flex: 1,
     padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc'
+    marginTop: 10,
+    paddingTop: 5
   },
   title: {
     fontWeight: 'bold',
     color: '#333',
-    textTransform: 'uppercase', // Les da un toque más elegante
+    textTransform: 'uppercase',
     letterSpacing: 1,
-    textAlign: 'center'
+    textAlign: 'center',
+    marginBottom: 5
   }
 })
