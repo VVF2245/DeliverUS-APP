@@ -160,7 +160,7 @@ export default function OrderDetailScreen({ navigation, route }) {
         data={order.products || []}
         renderItem={renderProduct}
         keyExtractor={item => item.id.toString()}
-        contentContainerStyle={{ padding: 10 }}
+        contentContainerStyle={{ paddingBottom: 10 }}
       />
     </View>
   )
@@ -168,6 +168,8 @@ export default function OrderDetailScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   ImageBackground: {
+    width: '100%',
+    flex: 1,
     height: 250,
     justifyContent: 'center'
   },
@@ -175,7 +177,8 @@ const styles = StyleSheet.create({
     height: 250,
     padding: 20,
     backgroundColor: 'rgba(0,0,0,0.5)',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    justifyContent: 'center'
   },
   centerContent: {
     flex: 1,
