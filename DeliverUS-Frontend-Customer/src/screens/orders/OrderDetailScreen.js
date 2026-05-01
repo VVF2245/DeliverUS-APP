@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react'
-import { FlatList, StyleSheet, View } from 'react-native'
+import { FlatList, StyleSheet, View, ImageBackground } from 'react-native'
 import TextRegular from '../../components/TextRegular'
 import TextSemiBold from '../../components/TextSemiBold'
 import ImageCard from '../../components/ImageCard'
+import restaurantBackground from '../../../assets/restaurantBackground.jpeg'
+import defaultProductImage from '../../../assets/product.jpeg'
+import { API_BASE_URL } from '@env'
 
 export default function OrderDetailScreen({ navigation, route }) {
   const [order, setOrder] = useState({
-    createdAt: new Date()
+    createdAt: new Date(),
+    price: 0,
+    shippingCosts: 0,
+    restaurant: {}
   })
 
   //MOCK
@@ -17,7 +23,7 @@ export default function OrderDetailScreen({ navigation, route }) {
       startedAt: null,
       sentAt: null,
       deliveredAt: null,
-      price: 20,
+      price: 13,
       shippingCosts: 2,
       address: 'Calle Falsa 123',
       status: 'pending',
@@ -55,47 +61,59 @@ export default function OrderDetailScreen({ navigation, route }) {
 
   const renderHeader = () => {
     return (
-      <View style={styles.headerContainer}>
-        <TextSemiBold textStyle={styles.textTitle}>
-          Order #{order.id}
-        </TextSemiBold>
+      <ImageBackground
+        style={styles.ImageBackground}
+        source={
+          order.restaurant?.heroImage
+            ? {
+                uri: API_BASE_URL + '/' + order.restaurant.heroImage,
+                cache: 'force-cache'
+              }
+            : restaurantBackground
+        }
+      >
+        <View style={styles.headerContainer}>
+          {/* TÍTULO A LA IZQUIERDA */}
+          <TextSemiBold textStyle={styles.textTitle}>
+            Order #{order.id} - Total:{' '}
+            {(order.price + order.shippingCosts || 0).toFixed(2)} €
+          </TextSemiBold>
 
-        <TextRegular textStyle={styles.text}>
-          Restaurant: {order.restaurant?.name}
-        </TextRegular>
-        <TextRegular textStyle={styles.text}>
-          Status: {order.status}
-        </TextRegular>
+          <View style={styles.centerContent}>
+            <TextRegular textStyle={styles.text}>
+              Restaurant: {order.restaurant?.name}
+            </TextRegular>
+            <TextRegular textStyle={styles.text}>
+              Status: {order.status}
+            </TextRegular>
 
-        <TextRegular textStyle={styles.text}>
-          Created: {formatDate(order.createdAt)}
-        </TextRegular>
-        <TextRegular textStyle={styles.text}>
-          Started: {formatDate(order.startedAt)}
-        </TextRegular>
-        <TextRegular textStyle={styles.text}>
-          Sent: {formatDate(order.sentAt)}
-        </TextRegular>
-        <TextRegular textStyle={styles.text}>
-          Delivered: {formatDate(order.deliveredAt)}
-        </TextRegular>
+            <TextRegular textStyle={styles.text}>
+              Created: {formatDate(order.createdAt)}
+            </TextRegular>
+            <TextRegular textStyle={styles.text}>
+              Started: {formatDate(order.startedAt)}
+            </TextRegular>
+            <TextRegular textStyle={styles.text}>
+              Sent: {formatDate(order.sentAt)}
+            </TextRegular>
+            <TextRegular textStyle={styles.text}>
+              Delivered: {formatDate(order.deliveredAt)}
+            </TextRegular>
 
-        <TextRegular textStyle={styles.text}>
-          Address: {order.address}
-        </TextRegular>
+            <TextRegular textStyle={styles.text}>
+              Address: {order.address}
+            </TextRegular>
 
-        <TextRegular textStyle={styles.text}>
-          Price: {order.price.toFixed(2)} €
-        </TextRegular>
+            <TextRegular textStyle={styles.text}>
+              Price: {order.price.toFixed(2)} €
+            </TextRegular>
 
-        <TextRegular textStyle={styles.text}>
-          ShippingCosts: {order.shippingCosts.toFixed(2)} €
-        </TextRegular>
-
-        <TextSemiBold textStyle={styles.text}>
-          Total: {(order.price + order.shippingCosts || 0).toFixed(2)} €
-        </TextSemiBold>
-      </View>
+            <TextRegular textStyle={styles.text}>
+              ShippingCosts: {order.shippingCosts.toFixed(2)} €
+            </TextRegular>
+          </View>
+        </View>
+      </ImageBackground>
     )
   }
 
@@ -105,7 +123,14 @@ export default function OrderDetailScreen({ navigation, route }) {
     const totalPrice = quantity * unityPrice
 
     return (
-      <ImageCard title={item.name}>
+      <ImageCard
+        imageUri={
+          item.image
+            ? { uri: API_BASE_URL + '/' + item.image }
+            : defaultProductImage
+        }
+        title={item.name}
+      >
         <TextRegular>{item.description}</TextRegular>
 
         <View style={styles.row}>
@@ -142,10 +167,20 @@ export default function OrderDetailScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
+  ImageBackground: {
+    height: 250,
+    justifyContent: 'center'
+  },
   headerContainer: {
+    height: 250,
+    padding: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    flexDirection: 'column'
+  },
+  centerContent: {
+    flex: 1,
     justifyContent: 'center',
-    alignItems: 'flex-start',
-    margin: 50
+    alignItems: 'center'
   },
   textTitle: {
     fontSize: 20,
