@@ -113,52 +113,35 @@ export default function RestaurantsScreen({ navigation, route }) {
   return (
     <View style={styles.container}>
       <View style={styles.FRHeader}>
-        <TextSemiBold>FR1: Restaurants listing.</TextSemiBold>
-        <TextRegular>
-          List restaurants and enable customers to navigate to restaurant
-          details so they can create and place a new order
-        </TextRegular>
-        <TextSemiBold>FR7: Show top 3 products.</TextSemiBold>
-        <TextRegular>
-          Customers will be able to query top 3 products from all restaurants.
-          Top products are the most popular ones, in other words the best
-          sellers.
-        </TextRegular>
+        <TextSemiBold style={[styles.title, { fontSize: 24 }]}>
+          Pick your favourite restaurant
+        </TextSemiBold>
       </View>
-      <ScrollView>
+      <View
+        style={[
+          styles.section,
+          { flex: 2, borderBottomWidth: 1, borderBottomColor: '#ccc' }
+        ]}
+      >
         <FlatList
           data={restaurants}
           renderItem={renderRestaurantWithImageCard}
           keyExtractor={item => item.id.toString()}
+          showsVerticalScrollIndicator={false}
         />
-        <TextSemiBold
-          style={{ marginTop: 40, marginBottom: 10, marginLeft: 15 }}
-        >
-          Top 3 Popular Products
+      </View>
+      <View style={[styles.section, { flex: 1 }]}>
+        <TextSemiBold style={[styles.title, { fontSize: 16, color: 'green' }]}>
+          Trending at Restaurants
         </TextSemiBold>
         <FlatList
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
           data={top3Products}
           renderItem={renderPopularProducts}
           keyExtractor={item => item.id.toString()}
         />
-      </ScrollView>
-      <Pressable
-        onPress={() => {
-          navigation.navigate('RestaurantDetailScreen', { id: 1 }) // TODO: Change this to the actual restaurant id as they are rendered as a FlatList
-        }}
-        style={({ pressed }) => [
-          {
-            backgroundColor: pressed
-              ? GlobalStyles.brandPrimaryTap
-              : GlobalStyles.brandPrimary
-          },
-          styles.button
-        ]}
-      >
-        <TextRegular textStyle={styles.text}>
-          Go to Restaurant Detail Screen
-        </TextRegular>
-      </Pressable>
+      </View>
     </View>
   )
 }
@@ -191,5 +174,19 @@ const styles = StyleSheet.create({
   emptyList: {
     textAlign: 'center',
     padding: 50
+  },
+  // estilos creados para mejorar el aspecto final de la pagina
+  section: {
+    padding: 10,
+    marginTop: 10,
+    paddingTop: 5
+  },
+  title: {
+    fontWeight: 'bold',
+    color: '#333',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    textAlign: 'center',
+    marginBottom: 5
   }
 })
