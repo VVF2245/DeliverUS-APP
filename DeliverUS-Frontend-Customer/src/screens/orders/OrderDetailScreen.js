@@ -1,36 +1,206 @@
-import { useEffect } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { useEffect, useState } from 'react'
+import { FlatList, StyleSheet, View, ImageBackground } from 'react-native'
 import TextRegular from '../../components/TextRegular'
 import TextSemiBold from '../../components/TextSemiBold'
+import ImageCard from '../../components/ImageCard'
+import restaurantBackground from '../../../assets/restaurantBackground.jpeg'
+import defaultProductImage from '../../../assets/product.jpeg'
+import { API_BASE_URL } from '@env'
 
 export default function OrderDetailScreen({ navigation, route }) {
-  useEffect(() => {}, [route])
+  const [order, setOrder] = useState({
+    createdAt: new Date(),
+    price: 0,
+    shippingCosts: 0,
+    restaurant: {}
+  })
+
+  //MOCK
+  useEffect(() => {
+    setOrder({
+      id: 1,
+      createdAt: new Date(),
+      startedAt: null,
+      sentAt: null,
+      deliveredAt: null,
+      price: 13,
+      shippingCosts: 2,
+      address: 'Calle Falsa 123',
+      status: 'pending',
+      restaurantId: 3,
+      restaurant: {
+        id: 3,
+        name: 'Burger King'
+      },
+      products: [
+        {
+          id: 1,
+          name: 'Burger',
+          description: 'Big burger',
+          OrderProducts: {
+            quantity: 2,
+            unityPrice: 5
+          }
+        },
+        {
+          id: 2,
+          name: 'Fries',
+          description: 'Crispy fries',
+          OrderProducts: {
+            quantity: 1,
+            unityPrice: 3
+          }
+        }
+      ]
+    })
+  }, [])
+
+  const formatDate = date => {
+    return date ? new Date(date).toLocaleString() : '-'
+  }
+
+  const renderHeader = () => {
+    return (
+      <ImageBackground
+        style={styles.ImageBackground}
+        source={
+          order.restaurant?.heroImage
+            ? {
+                uri: API_BASE_URL + '/' + order.restaurant.heroImage,
+                cache: 'force-cache'
+              }
+            : restaurantBackground
+        }
+      >
+        <View style={styles.headerContainer}>
+          {/* TÍTULO A LA IZQUIERDA */}
+          <TextSemiBold textStyle={styles.textTitle}>
+            Order #{order.id} - Total:{' '}
+            {(order.price + order.shippingCosts || 0).toFixed(2)} €
+          </TextSemiBold>
+
+          <View style={styles.centerContent}>
+            <TextRegular textStyle={styles.text}>
+              Restaurant: {order.restaurant?.name}
+            </TextRegular>
+            <TextRegular textStyle={styles.text}>
+              Status: {order.status}
+            </TextRegular>
+
+            <TextRegular textStyle={styles.text}>
+              Created: {formatDate(order.createdAt)}
+            </TextRegular>
+            <TextRegular textStyle={styles.text}>
+              Started: {formatDate(order.startedAt)}
+            </TextRegular>
+            <TextRegular textStyle={styles.text}>
+              Sent: {formatDate(order.sentAt)}
+            </TextRegular>
+            <TextRegular textStyle={styles.text}>
+              Delivered: {formatDate(order.deliveredAt)}
+            </TextRegular>
+
+            <TextRegular textStyle={styles.text}>
+              Address: {order.address}
+            </TextRegular>
+
+            <TextRegular textStyle={styles.text}>
+              Price: {order.price.toFixed(2)} €
+            </TextRegular>
+
+            <TextRegular textStyle={styles.text}>
+              ShippingCosts: {order.shippingCosts.toFixed(2)} €
+            </TextRegular>
+          </View>
+        </View>
+      </ImageBackground>
+    )
+  }
+
+  const renderProduct = ({ item }) => {
+    const quantity = item.OrderProducts?.quantity || 0
+    const unityPrice = item.OrderProducts?.unityPrice || 0
+    const totalPrice = quantity * unityPrice
+
+    return (
+      <ImageCard
+        imageUri={
+          item.image
+            ? { uri: API_BASE_URL + '/' + item.image }
+            : defaultProductImage
+        }
+        title={item.name}
+      >
+        <TextRegular>{item.description}</TextRegular>
+
+        <View style={styles.row}>
+          <TextRegular>
+            {quantity} x {unityPrice.toFixed(2)} €
+          </TextRegular>
+          <TextSemiBold>{totalPrice.toFixed(2)} €</TextSemiBold>
+        </View>
+      </ImageCard>
+    )
+  }
+
+  const renderEmptyProductsList = () => {
+    return (
+      <TextRegular textStyle={styles.emptyList}>
+        This order has no products yet.
+      </TextRegular>
+    )
+  }
 
   return (
     <View style={styles.container}>
-      <View style={styles.FRHeader}>
-        <TextSemiBold>FR6: Show order details</TextSemiBold>
-        <TextRegular>
-          A customer will be able to look his/her orders up. The system should
-          provide all details of an order, including the ordered products and
-          their prices.
-        </TextRegular>
-      </View>
+      <FlatList
+        style={styles.container}
+        ListHeaderComponent={renderHeader}
+        ListEmptyComponent={renderEmptyProductsList}
+        data={order.products || []}
+        renderItem={renderProduct}
+        keyExtractor={item => item.id.toString()}
+        contentContainerStyle={{ paddingBottom: 10 }}
+      />
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  FRHeader: {
-    // TODO: remove this style and the related <View>. Only for clarification purposes
-    justifyContent: 'center',
-    alignItems: 'left',
-    margin: 50
+  ImageBackground: {
+    width: '100%',
+    flex: 1,
+    height: 250,
+    justifyContent: 'center'
   },
-  container: {
+  headerContainer: {
+    height: 250,
+    padding: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    flexDirection: 'column',
+    justifyContent: 'center'
+  },
+  centerContent: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    margin: 50
+    alignItems: 'center'
+  },
+  textTitle: {
+    fontSize: 20,
+    color: 'white'
+  },
+  text: {
+    fontSize: 16,
+    color: 'white',
+    alignSelf: 'center',
+    marginLeft: 5
+  },
+  container: {
+    flex: 1
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10
   }
 })
