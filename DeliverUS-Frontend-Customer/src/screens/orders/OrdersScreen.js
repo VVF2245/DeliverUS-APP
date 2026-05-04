@@ -134,10 +134,7 @@ MOCK useEffect
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 50
+    flex: 1
   },
   button: {
     borderRadius: 8,
