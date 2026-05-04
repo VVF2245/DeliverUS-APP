@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import {
   StyleSheet,
   View,
   FlatList,
   ImageBackground,
-  Image
+  Image,
+  Pressable
 } from 'react-native'
 import { showMessage } from 'react-native-flash-message'
 import { getDetail } from '../../api/RestaurantEndpoints'
@@ -13,9 +14,15 @@ import TextRegular from '../../components/TextRegular'
 import TextSemiBold from '../../components/TextSemiBold'
 import * as GlobalStyles from '../../styles/GlobalStyles'
 import { API_BASE_URL } from '@env'
+import { CartContext } from '../../context/CartContext'
+import { AuthorizationContext } from '../../context/AuthorizationContext'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 export default function RestaurantDetailScreen({ navigation, route }) {
   const [restaurant, setRestaurant] = useState({})
+  const [quantities, setQuantities] = useState({})
+  const { addProduct, cartItems, getTotalPrice, restaurantId } = useContext(CartContext)
+  const { loggedInUser } = useContext(AuthorizationContext)
 
   useEffect(() => {
     fetchRestaurantDetail()
@@ -45,6 +52,14 @@ export default function RestaurantDetailScreen({ navigation, route }) {
             sending it to the backend.
           </TextRegular>
         </View>
+        {restaurantId && restaurantId !== restaurant.id && cartItems.length > 0 && (
+          <View style={styles.warningBanner}>
+            <MaterialCommunityIcons name="alert" size={20} color="white" />
+            <TextRegular textStyle={styles.warningText}>
+              You have items from another restaurant. Your cart will be cleared when adding items here.
+            </TextRegular>
+          </View>
+        )}
         <ImageBackground
           source={
             restaurant?.heroImage
@@ -86,6 +101,49 @@ export default function RestaurantDetailScreen({ navigation, route }) {
   }
 
   const renderProduct = ({ item }) => {
+    const quantity = quantities[item.id] || 0
+
+    const incrementQuantity = () => {
+      setQuantities({ ...quantities, [item.id]: quantity + 1 })
+    }
+
+    const decrementQuantity = () => {
+      if (quantity > 0) {
+        setQuantities({ ...quantities, [item.id]: quantity - 1 })
+      }
+    }
+
+    const handleAddToCart = () => {
+      if (!loggedInUser) {
+        showMessage({
+          message: 'Please log in to add products to your order',
+          type: 'warning',
+          style: GlobalStyles.flashStyle,
+          titleStyle: GlobalStyles.flashTextStyle
+        })
+        navigation.navigate('Profile')
+        return
+      }
+
+      if (quantity > 0) {
+        addProduct(item, quantity, restaurant.id)
+        setQuantities({ ...quantities, [item.id]: 0 })
+        showMessage({
+          message: `${item.name} added to cart`,
+          type: 'success',
+          style: GlobalStyles.flashStyle,
+          titleStyle: GlobalStyles.flashTextStyle
+        })
+      } else {
+        showMessage({
+          message: 'Please select a quantity',
+          type: 'warning',
+          style: GlobalStyles.flashStyle,
+          titleStyle: GlobalStyles.flashTextStyle
+        })
+      }
+    }
+
     return (
       <ImageCard
         imageUri={
@@ -101,6 +159,44 @@ export default function RestaurantDetailScreen({ navigation, route }) {
           <TextRegular textStyle={styles.availability}>
             Not available
           </TextRegular>
+        )}
+        {item.availability && (
+          <View style={styles.quantityContainer}>
+            <Pressable
+              onPress={decrementQuantity}
+              style={[styles.quantityButton, { marginRight: 10 }]}
+            >
+              <MaterialCommunityIcons
+                name="minus"
+                size={20}
+                color="white"
+              />
+            </Pressable>
+            <TextSemiBold textStyle={styles.quantityText}>
+              {quantity}
+            </TextSemiBold>
+            <Pressable
+              onPress={incrementQuantity}
+              style={[styles.quantityButton, { marginLeft: 10 }]}
+            >
+              <MaterialCommunityIcons
+                name="plus"
+                size={20}
+                color="white"
+              />
+            </Pressable>
+            <Pressable
+              onPress={handleAddToCart}
+              style={[styles.addButton, { marginLeft: 'auto' }]}
+            >
+              <MaterialCommunityIcons
+                name="cart-plus"
+                size={20}
+                color="white"
+              />
+              <TextRegular textStyle={styles.addButtonText}>Add</TextRegular>
+            </Pressable>
+          </View>
         )}
       </ImageCard>
     )
@@ -141,6 +237,9 @@ export default function RestaurantDetailScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
+  screenContainer: {
+    flex: 1
+  },
   FRHeader: {
     // TODO: remove this style and the related <View>. Only for clarification purposes
     justifyContent: 'center',
@@ -203,20 +302,51 @@ const styles = StyleSheet.create({
     marginRight: 5,
     color: GlobalStyles.brandSecondary
   },
-  actionButton: {
-    borderRadius: 8,
-    height: 40,
-    marginTop: 12,
-    margin: '1%',
-    padding: 10,
-    alignSelf: 'center',
-    flexDirection: 'column',
-    width: '50%'
-  },
-  actionButtonsContainer: {
+  quantityContainer: {
     flexDirection: 'row',
-    bottom: 5,
-    position: 'absolute',
-    width: '90%'
+    alignItems: 'center',
+    marginTop: 10
+  },
+  quantityButton: {
+    backgroundColor: GlobalStyles.brandPrimary,
+    borderRadius: 6,
+    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  quantityText: {
+    fontSize: 16,
+    marginHorizontal: 10
+  },
+  addButton: {
+    backgroundColor: GlobalStyles.brandSuccess,
+    borderRadius: 6,
+    padding: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12
+  },
+  addButtonText: {
+    color: 'white',
+    marginLeft: 5,
+    fontSize: 14
+  },
+  price: {
+    fontSize: 16,
+    marginTop: 5
+  },
+  warningBanner: {
+    backgroundColor: GlobalStyles.brandSecondaryTap,
+    flexDirection: 'row',
+    padding: 12,
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: GlobalStyles.brandSecondary
+  },
+  warningText: {
+    color: 'white',
+    marginLeft: 10,
+    fontSize: 13,
+    flex: 1
   }
 })
