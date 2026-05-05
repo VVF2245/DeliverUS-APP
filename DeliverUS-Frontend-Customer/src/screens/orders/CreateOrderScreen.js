@@ -1,11 +1,5 @@
 import { useContext, useState } from 'react'
-import {
-  StyleSheet,
-  View,
-  FlatList,
-  Pressable,
-  Alert
-} from 'react-native'
+import { StyleSheet, View, FlatList, Pressable, Alert } from 'react-native'
 import { showMessage } from 'react-native-flash-message'
 import TextRegular from '../../components/TextRegular'
 import TextSemiBold from '../../components/TextSemiBold'
@@ -14,13 +8,24 @@ import { CartContext } from '../../context/CartContext'
 import { AuthorizationContext } from '../../context/AuthorizationContext'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { createOrder } from '../../api/OrderEndpoints'
+import DeleteModal from '../../components/DeleteModal'
+import ConfirmModal from '../../components/ConfirmModal'
 
 export default function CreateOrderScreen({ navigation }) {
-  const { cartItems, removeProduct, updateQuantity, clearCart, getTotalPrice, restaurantId } = useContext(CartContext)
+  const {
+    cartItems,
+    removeProduct,
+    updateQuantity,
+    clearCart,
+    getTotalPrice,
+    restaurantId
+  } = useContext(CartContext)
   const { loggedInUser } = useContext(AuthorizationContext)
   const [loading, setLoading] = useState(false)
+  const [orderToDismiss, setOrderToDismiss] = useState(false)
+  const [orderToConfirm, setOrderToConfirm] = useState(false)
 
-  const handleRemoveProduct = (productId) => {
+  const handleRemoveProduct = productId => {
     removeProduct(productId)
     showMessage({
       message: 'Product removed from cart',
@@ -68,7 +73,7 @@ export default function CreateOrderScreen({ navigation }) {
               }
 
               await createOrder(orderData)
-              
+
               clearCart()
               showMessage({
                 message: 'Order confirmed successfully!',
@@ -76,7 +81,7 @@ export default function CreateOrderScreen({ navigation }) {
                 style: GlobalStyles.flashStyle,
                 titleStyle: GlobalStyles.flashTextStyle
               })
-              
+
               navigation.navigate('OrdersScreen')
             } catch (error) {
               showMessage({
@@ -126,9 +131,12 @@ export default function CreateOrderScreen({ navigation }) {
     return (
       <View style={styles.productItem}>
         <View style={styles.productInfo}>
-          <TextSemiBold textStyle={styles.productName}>{item.name}</TextSemiBold>
+          <TextSemiBold textStyle={styles.productName}>
+            {item.name}
+          </TextSemiBold>
           <TextRegular textStyle={styles.productPrice}>
-            {item.price.toFixed(2)}€ x {item.quantity} = {(item.price * item.quantity).toFixed(2)}€
+            {item.price.toFixed(2)}€ x {item.quantity} ={' '}
+            {(item.price * item.quantity).toFixed(2)}€
           </TextRegular>
         </View>
         <View style={styles.productControls}>
@@ -138,7 +146,9 @@ export default function CreateOrderScreen({ navigation }) {
           >
             <MaterialCommunityIcons name="minus" size={16} color="white" />
           </Pressable>
-          <TextSemiBold textStyle={styles.quantityText}>{item.quantity}</TextSemiBold>
+          <TextSemiBold textStyle={styles.quantityText}>
+            {item.quantity}
+          </TextSemiBold>
           <Pressable
             onPress={() => handleUpdateQuantity(item.id, item.quantity + 1)}
             style={styles.quantityButton}
@@ -147,7 +157,10 @@ export default function CreateOrderScreen({ navigation }) {
           </Pressable>
           <Pressable
             onPress={() => handleRemoveProduct(item.id)}
-            style={[styles.quantityButton, { marginLeft: 10, backgroundColor: GlobalStyles.brandPrimary }]}
+            style={[
+              styles.quantityButton,
+              { marginLeft: 10, backgroundColor: GlobalStyles.brandPrimary }
+            ]}
           >
             <MaterialCommunityIcons name="delete" size={16} color="white" />
           </Pressable>
@@ -179,7 +192,7 @@ export default function CreateOrderScreen({ navigation }) {
         </View>
         <View style={styles.buttonsContainer}>
           <Pressable
-            onPress={handleCancelOrder}
+            onPress={() => setOrderToDismiss(true)}
             style={[styles.button, styles.cancelButton]}
             disabled={loading}
           >
@@ -187,7 +200,7 @@ export default function CreateOrderScreen({ navigation }) {
             <TextRegular textStyle={styles.buttonText}>Dismiss</TextRegular>
           </Pressable>
           <Pressable
-            onPress={handleConfirmOrder}
+            onPress={() => setOrderToConfirm(true)}
             style={[styles.button, styles.confirmButton]}
             disabled={loading}
           >
@@ -207,7 +220,7 @@ export default function CreateOrderScreen({ navigation }) {
           You can edit or remove products before confirming
         </TextRegular>
       </View>
-      
+
       <FlatList
         data={cartItems}
         renderItem={renderProductItem}
@@ -215,8 +228,17 @@ export default function CreateOrderScreen({ navigation }) {
         ListEmptyComponent={renderEmpty}
         style={styles.listContainer}
       />
-
       {renderFooter()}
+      <DeleteModal
+        isVisible={orderToDismiss === true}
+        onCancel={() => setOrderToDismiss(false)}
+        onConfirm={() => handleCancelOrder}
+      ></DeleteModal>
+      <ConfirmModal
+        isVisible={orderToConfirm === true}
+        onCancel={() => setOrderToConfirm(false)}
+        onConfirm={() => handleConfirmOrder}
+      ></ConfirmModal>
     </View>
   )
 }
