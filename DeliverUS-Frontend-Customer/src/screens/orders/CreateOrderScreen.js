@@ -9,7 +9,7 @@ import { AuthorizationContext } from '../../context/AuthorizationContext'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { createOrder } from '../../api/OrderEndpoints'
 import DeleteModal from '../../components/DeleteModal'
-import ConfirmModal from '../../components/ConfirmModal'
+import ConfirmModal from '../../components/ConfirmModal.js'
 
 export default function CreateOrderScreen({ navigation }) {
   const {
