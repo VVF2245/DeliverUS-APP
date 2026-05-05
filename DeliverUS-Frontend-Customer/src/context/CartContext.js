@@ -1,5 +1,6 @@
 import { createContext, useState } from 'react'
 
+// Contexto para gestionar el carrito de compras de DeliverUS
 const CartContext = createContext()
 
 const CartContextProvider = props => {
@@ -9,11 +10,15 @@ const CartContextProvider = props => {
     setOrder(prevOrder => {
       // Convertir a número para asegurar comparación correcta
       const newRestId = Number(newRestaurantId)
-      const currentRestId = prevOrder.restaurantId ? Number(prevOrder.restaurantId) : null
+      const currentRestId = prevOrder.restaurantId
+        ? Number(prevOrder.restaurantId)
+        : null
 
       // Si cambió de restaurante, limpiar carrito
       if (currentRestId && currentRestId !== newRestId) {
-        console.log(`Cambio de restaurante detectado: ${currentRestId} -> ${newRestId}. Limpiando carrito.`)
+        console.log(
+          `Cambio de restaurante detectado: ${currentRestId} -> ${newRestId}. Limpiando carrito.`
+        )
         return {
           restaurantId: newRestId,
           items: [{ ...product, quantity }]
@@ -78,7 +83,10 @@ const CartContextProvider = props => {
   }
 
   const getTotalPrice = () => {
-    return order.items.reduce((total, item) => total + item.price * item.quantity, 0)
+    return order.items.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    )
   }
 
   const getTotalItems = () => {

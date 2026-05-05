@@ -6,6 +6,7 @@ import * as GlobalStyles from '../styles/GlobalStyles'
 import TextSemiBold from './TextSemiBold'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 
+// boton del carrito
 export default function FloatingCartButton() {
   const navigation = useNavigation()
   const { cartItems, getTotalPrice } = useContext(CartContext)
@@ -17,7 +18,9 @@ export default function FloatingCartButton() {
   return (
     <Pressable
       style={styles.floatingCartButton}
-      onPress={() => navigation.navigate('My Orders', { screen: 'CreateOrderScreen' })}
+      onPress={() =>
+        navigation.navigate('My Orders', { screen: 'CreateOrderScreen' })
+      }
     >
       <View style={styles.cartBadge}>
         <TextSemiBold textStyle={styles.cartBadgeText}>
