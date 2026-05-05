@@ -49,82 +49,48 @@ export default function CreateOrderScreen({ navigation }) {
       })
       return
     }
+    setLoading(true)
+    try {
+      const orderData = {
+        restaurantId: restaurantId,
+        products: cartItems.map(item => ({
+          productId: item.id,
+          quantity: item.quantity
+        }))
+      }
 
-    Alert.alert(
-      'Confirm Order',
-      `Total: ${getTotalPrice().toFixed(2)}€\n\nAre you sure you want to place this order?`,
-      [
-        {
-          text: 'Cancel',
-          onPress: () => {},
-          style: 'cancel'
-        },
-        {
-          text: 'Confirm',
-          onPress: async () => {
-            setLoading(true)
-            try {
-              const orderData = {
-                restaurantId: restaurantId,
-                products: cartItems.map(item => ({
-                  productId: item.id,
-                  quantity: item.quantity
-                }))
-              }
+      await createOrder(orderData)
 
-              await createOrder(orderData)
+      clearCart()
+      showMessage({
+        message: 'Order confirmed successfully!',
+        type: 'success',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
 
-              clearCart()
-              showMessage({
-                message: 'Order confirmed successfully!',
-                type: 'success',
-                style: GlobalStyles.flashStyle,
-                titleStyle: GlobalStyles.flashTextStyle
-              })
-
-              navigation.navigate('OrdersScreen')
-            } catch (error) {
-              showMessage({
-                message: `Error creating order: ${error.message}`,
-                type: 'danger',
-                style: GlobalStyles.flashStyle,
-                titleStyle: GlobalStyles.flashTextStyle
-              })
-            } finally {
-              setLoading(false)
-            }
-          }
-        }
-      ]
-    )
+      navigation.navigate('OrdersScreen')
+    } catch (error) {
+      showMessage({
+        message: `Error creating order: ${error.message}`,
+        type: 'danger',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleCancelOrder = () => {
-    Alert.alert(
-      'Dismiss Order',
-      'Are you sure you want to dismiss this order? All products will be removed.',
-      [
-        {
-          text: 'Cancel',
-          onPress: () => {},
-          style: 'cancel'
-        },
-        {
-          text: 'Dismiss',
-          onPress: () => {
-            clearCart()
-            showMessage({
-              message: 'Order dismissed',
-              type: 'info',
-              style: GlobalStyles.flashStyle,
-              titleStyle: GlobalStyles.flashTextStyle
-            })
-            navigation.navigate('OrdersScreen')
-          },
-          style: 'destructive'
-        }
-      ]
-    )
+    clearCart()
+    showMessage({
+      message: 'Order dismissed',
+      type: 'info',
+      style: GlobalStyles.flashStyle,
+      titleStyle: GlobalStyles.flashTextStyle
+    })
+    navigation.navigate('OrdersScreen')
   }
 
   const renderProductItem = ({ item }) => {
@@ -232,12 +198,13 @@ export default function CreateOrderScreen({ navigation }) {
       <DeleteModal
         isVisible={orderToDismiss === true}
         onCancel={() => setOrderToDismiss(false)}
-        onConfirm={() => handleCancelOrder}
+        onConfirm={handleCancelOrder}
       ></DeleteModal>
       <ConfirmModal
         isVisible={orderToConfirm === true}
         onCancel={() => setOrderToConfirm(false)}
-        onConfirm={() => handleConfirmOrder}
+        onConfirm={() => handleConfirmOrder()}
+        title="Order"
       ></ConfirmModal>
     </View>
   )

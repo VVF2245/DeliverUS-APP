@@ -16,7 +16,7 @@ export default function ConfirmModal(props) {
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <TextSemiBold textStyle={{ fontSize: 15 }}>
-            Please confirm deletion
+            Please confirm {props.title || 'Action'}
           </TextSemiBold>
           {props.children}
           <Pressable
@@ -43,9 +43,7 @@ export default function ConfirmModal(props) {
             onPress={props.onConfirm}
             style={({ pressed }) => [
               {
-                backgroundColor: pressed
-                  ? GlobalStyles.brandPrimaryTap
-                  : GlobalStyles.brandPrimary
+                backgroundColor: pressed ? '#668102' : '#95be05' // Un verde estándar
               },
               styles.actionButton
             ]}
@@ -55,7 +53,11 @@ export default function ConfirmModal(props) {
                 { flex: 1, flexDirection: 'row', justifyContent: 'center' }
               ]}
             >
-              <MaterialCommunityIcons name="delete" color={'white'} size={20} />
+              <MaterialCommunityIcons
+                name="check-circle"
+                color={'white'}
+                size={20}
+              />
               <TextRegular textStyle={styles.text}>Confirm action</TextRegular>
             </View>
           </Pressable>
