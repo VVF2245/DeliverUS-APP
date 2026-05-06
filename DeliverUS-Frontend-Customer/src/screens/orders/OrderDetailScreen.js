@@ -75,7 +75,7 @@ export default function OrderDetailScreen({ navigation, route }) {
 
   const handleUpdateOrder = async values => {
     try {
-      const updatedOrder = await updateOrder({
+      const updatedOrder = await updateOrder(order.id, {
         ...order,
         address: newAddress
       })
