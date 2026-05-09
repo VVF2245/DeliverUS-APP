@@ -73,17 +73,19 @@ export default function OrderDetailScreen({ navigation, route }) {
     return date ? new Date(date).toLocaleString() : '-'
   }
 
-  const handleUpdateOrder = async values => {
+  const handleUpdateOrder = async () => {
     try {
-      const updatedOrder = await updateOrder(order.id, {
-        ...order,
-        address: newAddress
-      })
+      const orderToUpdate = {
+        address: newAddress,
+        products: order.products.map(product => ({
+          productId: product.id,
+          quantity: product.OrderProducts.quantity
+        }))
+      }
+      const updatedOrder = await updateOrder(order.id, orderToUpdate)
 
-      setOrder(prev => ({
-        ...prev,
-        ...updatedOrder
-      }))
+      console.log(updatedOrder)
+      setOrder(updatedOrder)
     } catch (error) {
       console.log(error)
     }
