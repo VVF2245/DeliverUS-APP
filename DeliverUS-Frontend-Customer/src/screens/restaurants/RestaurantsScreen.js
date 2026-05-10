@@ -91,6 +91,8 @@ export default function RestaurantsScreen({ navigation, route }) {
             : defaultProductImage
         }
         title={item.name}
+        isHorizontal={true}
+        backgroundButtom={GlobalStyles.brandPrimaryTap}
         onPress={() => {
           navigation.navigate('RestaurantDetailScreen', {
             id: item.restaurantId
@@ -111,18 +113,11 @@ export default function RestaurantsScreen({ navigation, route }) {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.FRHeader}>
+    <>
+      <View style={styles.container}>
         <TextSemiBold style={[styles.title, { fontSize: 24 }]}>
           Pick your favourite restaurant
         </TextSemiBold>
-      </View>
-      <View
-        style={[
-          styles.section,
-          { flex: 2, borderBottomWidth: 1, borderBottomColor: '#ccc' }
-        ]}
-      >
         <FlatList
           data={restaurants}
           renderItem={renderRestaurantWithImageCard}
@@ -130,31 +125,33 @@ export default function RestaurantsScreen({ navigation, route }) {
           showsVerticalScrollIndicator={false}
         />
       </View>
-      <View style={[styles.section, { flex: 1 }]}>
-        <TextSemiBold style={[styles.title, { fontSize: 16, color: 'green' }]}>
+      <View style={styles.popularHeader}>
+        <TextSemiBold style={[styles.title, { fontSize: 24, color: 'yellow' }]}>
           Trending at Restaurants
         </TextSemiBold>
-        <FlatList
-          horizontal={true}
-          showsHorizontalScrollIndicator={false}
-          data={top3Products}
-          renderItem={renderPopularProducts}
-          keyExtractor={item => item.id.toString()}
-        />
+        <View style={styles.section}>
+          <FlatList
+            horizontal={true}
+            showsHorizontalScrollIndicator={false}
+            data={top3Products}
+            renderItem={renderPopularProducts}
+            keyExtractor={item => item.id.toString()}
+          />
+        </View>
       </View>
-    </View>
+    </>
   )
 }
 
 const styles = StyleSheet.create({
-  FRHeader: {
-    // TODO: remove this style and the related <View>. Only for clarification purposes
+  popularHeader: {
     justifyContent: 'center',
-    alignItems: 'left',
-    margin: 50
+    alignItems: 'center',
+    backgroundColor: GlobalStyles.brandPrimaryTap,
+    flex: 1
   },
   container: {
-    flex: 1,
+    flex: 2,
     justifyContent: 'center',
     alignItems: 'center',
     margin: 50
@@ -170,11 +167,6 @@ const styles = StyleSheet.create({
     color: GlobalStyles.brandSecondary
   },
   // estilos creados para mejorar el aspecto final de la pagina
-  section: {
-    padding: 10,
-    marginTop: 10,
-    paddingTop: 5
-  },
   title: {
     fontWeight: 'bold',
     color: '#333',
