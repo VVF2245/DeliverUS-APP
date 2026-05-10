@@ -12,7 +12,7 @@ import ImageCard from '../../components/ImageCard'
 import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
 import { API_BASE_URL } from '@env'
 
-export default function OrdersScreen({ navigation }) {
+export default function OrdersScreen({ navigation, route }) {
   const [orders, setOrders] = useState([])
   const { loggedInUser } = useContext(AuthorizationContext)
 
@@ -22,7 +22,7 @@ export default function OrdersScreen({ navigation }) {
     } else {
       setOrders([])
     }
-  }, [loggedInUser])
+  }, [loggedInUser, route.params?.dirty])
 
   /*
 MOCK useEffect

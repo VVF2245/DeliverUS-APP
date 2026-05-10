@@ -22,6 +22,7 @@ export default function CreateOrderScreen({ navigation }) {
   } = useContext(CartContext)
   const { loggedInUser } = useContext(AuthorizationContext)
   const [loading, setLoading] = useState(false)
+  const [order, setOrder] = useState({})
   const [orderToDismiss, setOrderToDismiss] = useState(false)
   const [orderToConfirm, setOrderToConfirm] = useState(false)
 
@@ -49,17 +50,18 @@ export default function CreateOrderScreen({ navigation }) {
       })
       return
     }
-    setLoading(true)
     try {
       const orderData = {
-        restaurantId: restaurantId,
+        restaurantId: Number(restaurantId),
+        address: 'Calle Falsa 123', // Es obligatorio en el backend
         products: cartItems.map(item => ({
           productId: item.id,
           quantity: item.quantity
         }))
       }
 
-      await createOrder(orderData)
+      const createdOrder = await createOrder(orderData)
+      setOrder(createdOrder)
 
       clearCart()
       showMessage({
@@ -69,7 +71,9 @@ export default function CreateOrderScreen({ navigation }) {
         titleStyle: GlobalStyles.flashTextStyle
       })
 
-      navigation.navigate('OrdersScreen')
+      navigation.navigate('OrdersScreen', {
+        dirty: true
+      })
     } catch (error) {
       showMessage({
         message: `Error creating order: ${error.message}`,
@@ -77,8 +81,6 @@ export default function CreateOrderScreen({ navigation }) {
         style: GlobalStyles.flashStyle,
         titleStyle: GlobalStyles.flashTextStyle
       })
-    } finally {
-      setLoading(false)
     }
   }
 
