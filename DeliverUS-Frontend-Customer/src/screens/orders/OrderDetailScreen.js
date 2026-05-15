@@ -15,7 +15,7 @@ import restaurantBackground from '../../../assets/restaurantBackground.jpeg'
 import defaultProductImage from '../../../assets/product.jpeg'
 import { API_BASE_URL } from '@env'
 
-import { updateOrder } from '../../api/OrderEndpoints.js'
+import { updateOrder, getDetail } from '../../api/OrderEndpoints.js'
 
 export default function OrderDetailScreen({ navigation, route }) {
   const [order, setOrder] = useState({
@@ -30,6 +30,7 @@ export default function OrderDetailScreen({ navigation, route }) {
   const [showConfirmModal, setShowConfirmModal] = useState(false)
 
   //MOCK
+  /*
   useEffect(() => {
     setOrder({
       id: 1,
@@ -68,6 +69,19 @@ export default function OrderDetailScreen({ navigation, route }) {
       ]
     })
   }, [])
+  */
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const fetchedOrders = await getDetail(route.params.id)
+        setOrder(fetchedOrders)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    fetchOrders()
+  }, [route.params.id])
 
   const formatDate = date => {
     return date ? new Date(date).toLocaleString() : '-'

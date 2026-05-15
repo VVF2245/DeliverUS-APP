@@ -75,21 +75,23 @@ MOCK useEffect
           <TextRegular>Status: {item.status}</TextRegular>
           <TextSemiBold>{item.price?.toFixed(2)} €</TextSemiBold>
         </ImageCard>
-        <Pressable
-          onPress={() => {
-            setOrderToBeDeleted(item)
-          }}
-          style={({ pressed }) => [
-            {
-              backgroundColor: pressed
-                ? GlobalStyles.brandPrimaryTap
-                : GlobalStyles.brandPrimary
-            },
-            styles.deleteButton
-          ]}
-        >
-          <MaterialCommunityIcons name="delete" color={'white'} size={20} />
-        </Pressable>
+        {item.status === 'pending' && (
+          <Pressable
+            onPress={() => {
+              setOrderToBeDeleted(item)
+            }}
+            style={({ pressed }) => [
+              {
+                backgroundColor: pressed
+                  ? GlobalStyles.brandPrimaryTap
+                  : GlobalStyles.brandPrimary
+              },
+              styles.deleteButton
+            ]}
+          >
+            <MaterialCommunityIcons name="delete" color={'white'} size={20} />
+          </Pressable>
+        )}
       </View>
     )
   }
@@ -157,9 +159,7 @@ MOCK useEffect
         onCancel={() => setOrderToBeDeleted(null)}
         onConfirm={() => removeOrder(orderToBeDeleted)}
       >
-        <TextRegular>
-          Only pending orders can be deleted.
-        </TextRegular>
+        <TextRegular>Only pending orders can be deleted.</TextRegular>
       </DeleteModal>
       <Pressable
         onPress={() => {
