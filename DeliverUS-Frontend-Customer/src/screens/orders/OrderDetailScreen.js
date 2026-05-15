@@ -14,6 +14,8 @@ import ImageCard from '../../components/ImageCard'
 import restaurantBackground from '../../../assets/restaurantBackground.jpeg'
 import defaultProductImage from '../../../assets/product.jpeg'
 import { API_BASE_URL } from '@env'
+import * as GlobalStyles from '../../styles/GlobalStyles'
+import { showMessage } from 'react-native-flash-message'
 
 import { updateOrder, getDetail } from '../../api/OrderEndpoints.js'
 
@@ -97,7 +99,12 @@ export default function OrderDetailScreen({ navigation, route }) {
         }))
       }
       const updatedOrder = await updateOrder(order.id, orderToUpdate)
-
+      showMessage({
+        message: `Address updated successfully.`,
+        type: 'success',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
       console.log(updatedOrder)
       setOrder(updatedOrder)
     } catch (error) {
