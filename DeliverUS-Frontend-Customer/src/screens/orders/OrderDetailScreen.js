@@ -6,6 +6,7 @@ import ImageCard from '../../components/ImageCard'
 import restaurantBackground from '../../../assets/restaurantBackground.jpeg'
 import defaultProductImage from '../../../assets/product.jpeg'
 import { API_BASE_URL } from '@env'
+import { getDetail } from '../../api/OrderEndpoints'
 
 export default function OrderDetailScreen({ navigation, route }) {
   const [order, setOrder] = useState({
@@ -15,45 +16,21 @@ export default function OrderDetailScreen({ navigation, route }) {
     restaurant: {}
   })
 
-  //MOCK
   useEffect(() => {
-    setOrder({
-      id: 1,
-      createdAt: new Date(),
-      startedAt: null,
-      sentAt: null,
-      deliveredAt: null,
-      price: 13,
-      shippingCosts: 2,
-      address: 'Calle Falsa 123',
-      status: 'pending',
-      restaurantId: 3,
-      restaurant: {
-        id: 3,
-        name: 'Burger King'
-      },
-      products: [
-        {
-          id: 1,
-          name: 'Burger',
-          description: 'Big burger',
-          OrderProducts: {
-            quantity: 2,
-            unityPrice: 5
-          }
-        },
-        {
-          id: 2,
-          name: 'Fries',
-          description: 'Crispy fries',
-          OrderProducts: {
-            quantity: 1,
-            unityPrice: 3
-          }
-        }
-      ]
-    })
-  }, [])
+    const orderId = route.params.id
+    if (orderId) {
+      fetchOrder(orderId)
+    }
+  }, [route.params?.id])
+
+  const fetchOrder = async (orderId) => {
+    try {
+      const response = await getDetail(orderId)
+      setOrder(response)
+    } catch (error) {
+      console.error('Error fetching order:', error)
+    }
+  }
 
   const formatDate = date => {
     return date ? new Date(date).toLocaleString() : '-'
