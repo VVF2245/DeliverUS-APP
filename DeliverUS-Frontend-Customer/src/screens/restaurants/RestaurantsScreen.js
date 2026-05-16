@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
-import { StyleSheet, View, ScrollView } from 'react-native'
+import { StyleSheet, View, ScrollView, FlatList } from 'react-native'
 import TextSemiBold from '../../components/TextSemiBold'
 import TextRegular from '../../components/TextRegular'
 import { getAll } from '../../api/RestaurantEndpoints'
 import { getPopularProducts } from '../../api/ProductEndpoints'
 import * as GlobalStyles from '../../styles/GlobalStyles' //Imported globally to practise a different import style unlike that of RestaurantDetailScreen
-import { FlatList } from 'react-native'
 import ImageCard from '../../components/ImageCard'
 import { showMessage } from 'react-native-flash-message'
 
