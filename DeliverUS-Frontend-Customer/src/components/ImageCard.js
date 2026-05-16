@@ -29,9 +29,9 @@ export default function ImageCard(props) {
       onPress={props.onPress}
       style={({ pressed }) => [
         {
-          backgroundColor: pressed
-            ? GlobalStyles.brandPrimaryTap
-            : props.backgroundButtom || GlobalStyles.brandBackground // si no se quiere elegir fondo de color
+          backgroundColor:
+            props.backgroundButtom || GlobalStyles.brandBackground, // si no se quiere elegir fondo de color
+          opacity: pressed ? 0.7 : 1
         },
         styles.wrapperCustom
       ]}
