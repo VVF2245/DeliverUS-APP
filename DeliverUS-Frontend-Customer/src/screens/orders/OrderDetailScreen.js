@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import {
   FlatList,
   StyleSheet,
@@ -18,8 +18,10 @@ import * as GlobalStyles from '../../styles/GlobalStyles'
 import { showMessage } from 'react-native-flash-message'
 
 import { updateOrder, getDetail } from '../../api/OrderEndpoints.js'
+import { CartContext } from '../../context/CartContext'
 
 export default function OrderDetailScreen({ navigation, route }) {
+  const { loadOrderIntoCart } = useContext(CartContext)
   const [order, setOrder] = useState({
     createdAt: new Date(),
     price: 0,
@@ -186,8 +188,8 @@ export default function OrderDetailScreen({ navigation, route }) {
             <Pressable
               style={[styles.button, styles.secondaryButton]}
               onPress={() => {
+                loadOrderIntoCart(order)
                 console.log('Editar pedido (productos)')
-                // falta el navigate y tal
               }}
             >
               <TextRegular textStyle={styles.buttonText}>
