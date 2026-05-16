@@ -8,7 +8,9 @@ import * as GlobalStyles from '../styles/GlobalStyles'
 export default function ImageCard(props) {
   const renderImageCardBody = props => {
     return (
-      <View style={styles.card}>
+      <View
+        style={(props.isHorizontal && styles.horizontalCard) || styles.card}
+      >
         <View>
           <Image style={styles.image} source={props.imageUri} />
         </View>
@@ -27,9 +29,9 @@ export default function ImageCard(props) {
       onPress={props.onPress}
       style={({ pressed }) => [
         {
-          backgroundColor: pressed
-            ? GlobalStyles.brandPrimaryTap
-            : GlobalStyles.brandBackground
+          backgroundColor:
+            props.backgroundButtom || GlobalStyles.brandBackground, // si no se quiere elegir fondo de color
+          opacity: pressed ? 0.7 : 1
         },
         styles.wrapperCustom
       ]}
@@ -67,5 +69,17 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 15
+  },
+  // solo para tarjetas horizontales
+  horizontalCard: {
+    marginTop: 20,
+    marginHorizontal: '1%',
+    height: 127,
+    padding: 2,
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    borderRadius: 15,
+    width: 300
   }
 })

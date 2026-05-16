@@ -2,10 +2,12 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { NavigationContainer } from '@react-navigation/native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useContext, useEffect } from 'react'
+import { View, StyleSheet } from 'react-native'
 import * as GlobalStyles from '../styles/GlobalStyles'
 import RestaurantsStack from './restaurants/RestaurantsStack'
 import ProfileStack from './profile/ProfileStack'
 import OrdersStack from './orders/OrdersStack'
+import FloatingCartButton from '../components/FloatingCartButton'
 
 import {
   useFonts,
@@ -72,35 +74,45 @@ export default function Layout() {
     <>
       {fontsLoaded && (
         <NavigationContainer theme={GlobalStyles.navigationTheme}>
-          <Tab.Navigator
-            screenOptions={({ route }) => ({
-              tabBarIcon: ({ color, size }) => {
-                let iconName
-                if (route.name === 'Restaurants') {
-                  iconName = 'silverware-fork-knife'
-                } else if (route.name === 'My Orders') {
-                  iconName = 'format-list-text'
-                } else if (route.name === 'Profile') {
-                  iconName = 'account-circle'
-                }
-                return (
-                  <MaterialCommunityIcons
-                    name={iconName}
-                    color={color}
-                    size={size}
-                  />
-                )
-              },
-              headerShown: false
-            })}
-          >
-            <Tab.Screen name="Restaurants" component={RestaurantsStack} />
-            <Tab.Screen name="My Orders" component={OrdersStack} />
-            <Tab.Screen name="Profile" component={ProfileStack} />
-          </Tab.Navigator>
+          <View style={styles.container}>
+            <Tab.Navigator
+              screenOptions={({ route }) => ({
+                tabBarIcon: ({ color, size }) => {
+                  let iconName
+                  if (route.name === 'Restaurants') {
+                    iconName = 'silverware-fork-knife'
+                  } else if (route.name === 'My Orders') {
+                    iconName = 'format-list-text'
+                  } else if (route.name === 'Profile') {
+                    iconName = 'account-circle'
+                  }
+                  return (
+                    <MaterialCommunityIcons
+                      name={iconName}
+                      color={color}
+                      size={size}
+                    />
+                  )
+                },
+                headerShown: false
+              })}
+            >
+              <Tab.Screen name="Restaurants" component={RestaurantsStack} />
+              <Tab.Screen name="My Orders" component={OrdersStack} />
+              <Tab.Screen name="Profile" component={ProfileStack} />
+            </Tab.Navigator>
+            <FloatingCartButton />
+          </View>
           <FlashMessage position="top" />
         </NavigationContainer>
       )}
     </>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    position: 'relative'
+  }
+})

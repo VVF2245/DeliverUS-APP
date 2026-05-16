@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
-import { StyleSheet, View, Pressable, ScrollView } from 'react-native'
+import { StyleSheet, View, ScrollView, FlatList } from 'react-native'
 import TextSemiBold from '../../components/TextSemiBold'
 import TextRegular from '../../components/TextRegular'
 import { getAll } from '../../api/RestaurantEndpoints'
 import { getPopularProducts } from '../../api/ProductEndpoints'
 import * as GlobalStyles from '../../styles/GlobalStyles' //Imported globally to practise a different import style unlike that of RestaurantDetailScreen
-import { FlatList } from 'react-native'
 import ImageCard from '../../components/ImageCard'
 import { showMessage } from 'react-native-flash-message'
 
@@ -91,6 +90,8 @@ export default function RestaurantsScreen({ navigation, route }) {
             : defaultProductImage
         }
         title={item.name}
+        isHorizontal={true}
+        backgroundButtom={GlobalStyles.brandPrimaryTap}
         onPress={() => {
           navigation.navigate('RestaurantDetailScreen', {
             id: item.restaurantId
@@ -111,18 +112,11 @@ export default function RestaurantsScreen({ navigation, route }) {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.FRHeader}>
+    <>
+      <View style={styles.container}>
         <TextSemiBold style={[styles.title, { fontSize: 24 }]}>
           Pick your favourite restaurant
         </TextSemiBold>
-      </View>
-      <View
-        style={[
-          styles.section,
-          { flex: 2, borderBottomWidth: 1, borderBottomColor: '#ccc' }
-        ]}
-      >
         <FlatList
           data={restaurants}
           renderItem={renderRestaurantWithImageCard}
@@ -130,57 +124,49 @@ export default function RestaurantsScreen({ navigation, route }) {
           showsVerticalScrollIndicator={false}
         />
       </View>
-      <View style={[styles.section, { flex: 1 }]}>
-        <TextSemiBold style={[styles.title, { fontSize: 16, color: 'green' }]}>
+      <View style={styles.popularHeader}>
+        <TextSemiBold style={[styles.title, { fontSize: 24, color: 'yellow' }]}>
           Trending at Restaurants
         </TextSemiBold>
-        <FlatList
-          horizontal={true}
-          showsHorizontalScrollIndicator={false}
-          data={top3Products}
-          renderItem={renderPopularProducts}
-          keyExtractor={item => item.id.toString()}
-        />
+        <View style={styles.section}>
+          <FlatList
+            horizontal={true}
+            showsHorizontalScrollIndicator={false}
+            data={top3Products}
+            renderItem={renderPopularProducts}
+            keyExtractor={item => item.id.toString()}
+          />
+        </View>
       </View>
-    </View>
+    </>
   )
 }
 
 const styles = StyleSheet.create({
-  FRHeader: {
-    // TODO: remove this style and the related <View>. Only for clarification purposes
-    justifyContent: 'center',
-    alignItems: 'left',
-    margin: 50
-  },
-  container: {
-    flex: 1,
+  popularHeader: {
     justifyContent: 'center',
     alignItems: 'center',
-    margin: 50
+    backgroundColor: GlobalStyles.brandPrimaryTap,
+    paddingVertical: 20,
+    flex: 1
   },
-  button: {
-    borderRadius: 8,
-    height: 40,
-    margin: 12,
-    padding: 10,
-    width: '100%'
-  },
-  text: {
-    fontSize: 16,
-    color: 'white',
-    textAlign: 'center'
+  container: {
+    flex: 2,
+    alignItems: 'center',
+    marginHorizontal: 20,
+    paddingTop: 20
   },
   emptyList: {
     textAlign: 'center',
     padding: 50
   },
-  // estilos creados para mejorar el aspecto final de la pagina
-  section: {
-    padding: 10,
-    marginTop: 10,
-    paddingTop: 5
+  price: {
+    color: GlobalStyles.brandPrimary
   },
+  availability: {
+    color: GlobalStyles.brandSecondary
+  },
+  // estilos creados para mejorar el aspecto final de la pagina
   title: {
     fontWeight: 'bold',
     color: '#333',
