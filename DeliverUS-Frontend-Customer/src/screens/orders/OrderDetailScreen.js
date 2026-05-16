@@ -179,7 +179,19 @@ export default function OrderDetailScreen({ navigation, route }) {
               }}
             >
               <TextRegular textStyle={styles.buttonText}>
-                Editar dirección
+                Edit address
+              </TextRegular>
+            </Pressable>
+
+            <Pressable
+              style={[styles.button, styles.secondaryButton]}
+              onPress={() => {
+                console.log('Editar pedido (productos)')
+                // falta el navigate y tal
+              }}
+            >
+              <TextRegular textStyle={styles.buttonText}>
+                Edit order
               </TextRegular>
             </Pressable>
           </View>
@@ -352,14 +364,20 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     padding: 15,
-    alignItems: 'center'
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10
   },
   button: {
     backgroundColor: '#2ecc71',
     padding: 12,
     borderRadius: 8,
-    width: '80%',
+    flex: 1,
     alignItems: 'center'
+  },
+  secondaryButton: {
+    backgroundColor: '#3498db'
   },
   buttonText: {
     color: 'white',
