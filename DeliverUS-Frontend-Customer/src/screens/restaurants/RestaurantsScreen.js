@@ -148,13 +148,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: GlobalStyles.brandPrimaryTap,
+    paddingVertical: 20,
     flex: 1
   },
   container: {
     flex: 2,
-    justifyContent: 'center',
     alignItems: 'center',
-    margin: 50
+    marginHorizontal: 20,
+    paddingTop: 20
   },
   emptyList: {
     textAlign: 'center',
