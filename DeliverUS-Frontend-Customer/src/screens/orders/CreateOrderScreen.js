@@ -51,9 +51,10 @@ export default function CreateOrderScreen({ navigation }) {
       return
     }
     try {
+      
       const orderData = {
         restaurantId: Number(restaurantId),
-        address: 'Calle Falsa 123', // Es obligatorio en el backend
+        address: loggedInUser.address, // Es obligatorio en el backend
         products: cartItems.map(item => ({
           productId: item.id,
           quantity: item.quantity
