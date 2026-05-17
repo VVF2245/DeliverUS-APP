@@ -12,6 +12,7 @@ import ImageCard from '../../components/ImageCard'
 import DeleteModal from '../../components/DeleteModal'
 import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
 import { API_BASE_URL } from '@env'
+import { getRestaurantCategories } from '../../api/RestaurantEndpoints'
 
 export default function OrdersScreen({ navigation, route }) {
   const [orders, setOrders] = useState([])
@@ -58,6 +59,21 @@ MOCK useEffect
   }, [])
 */
 
+  const getStatusColor = status => {
+    switch (status) {
+      case 'pending':
+        return 'red'
+      case 'in process':
+        return 'orange'
+      case 'sent':
+        return 'gold'
+      case 'delivered':
+        return 'green'
+      default:
+        return 'black'
+    }
+  }
+
   const renderOrder = ({ item }) => {
     return (
       <View style={styles.orderContainer}>
@@ -72,7 +88,11 @@ MOCK useEffect
             navigation.navigate('OrderDetailScreen', { id: item.id })
           }}
         >
-          <TextRegular>Status: {item.status}</TextRegular>
+          <TextRegular
+            style={{ color: getStatusColor(item.status), fontWeight: '500' }}
+          >
+            Status: {item.status}
+          </TextRegular>
           <TextSemiBold>{item.price?.toFixed(2)} €</TextSemiBold>
           {item.status === 'pending' && (
             <Pressable
