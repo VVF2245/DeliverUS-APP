@@ -33,48 +33,6 @@ export default function OrderDetailScreen({ navigation, route }) {
 
   const [showConfirmModal, setShowConfirmModal] = useState(false)
 
-  //MOCK
-  /*
-  useEffect(() => {
-    setOrder({
-      id: 1,
-      createdAt: new Date(),
-      startedAt: null,
-      sentAt: null,
-      deliveredAt: null,
-      price: 13,
-      shippingCosts: 2,
-      address: 'Calle Falsa 123',
-      status: 'pending',
-      restaurantId: 3,
-      restaurant: {
-        id: 3,
-        name: 'Burger King'
-      },
-      products: [
-        {
-          id: 1,
-          name: 'Burger',
-          description: 'Big burger',
-          OrderProducts: {
-            quantity: 2,
-            unityPrice: 5
-          }
-        },
-        {
-          id: 2,
-          name: 'Fries',
-          description: 'Crispy fries',
-          OrderProducts: {
-            quantity: 1,
-            unityPrice: 3
-          }
-        }
-      ]
-    })
-  }, [])
-  */
-
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -118,7 +76,8 @@ export default function OrderDetailScreen({ navigation, route }) {
     return (
       <>
         <ImageBackground
-          style={styles.ImageBackground}
+          style={styles.heroImage}
+          imageStyle={styles.heroImageStyle}
           source={
             order.restaurant?.heroImage
               ? {
@@ -128,47 +87,70 @@ export default function OrderDetailScreen({ navigation, route }) {
               : restaurantBackground
           }
         >
-          <View style={styles.headerContainer}>
-            {/* TÍTULO A LA IZQUIERDA */}
-            <TextSemiBold textStyle={styles.textTitle}>
-              Order #{order.id}
-            </TextSemiBold>
+          <View style={styles.heroOverlay}>
+            <View style={styles.heroContent}>
+              <TextSemiBold textStyle={styles.heroTitle}>
+                {order.restaurant?.name}
+              </TextSemiBold>
 
-            <View style={styles.centerContent}>
-              <TextRegular textStyle={styles.text}>
-                Restaurant: {order.restaurant?.name}
-              </TextRegular>
-              <TextRegular textStyle={styles.text}>
-                Status: {order.status}
-              </TextRegular>
-
-              <TextRegular textStyle={styles.text}>
-                Created: {formatDate(order.createdAt)}
-              </TextRegular>
-              <TextRegular textStyle={styles.text}>
-                Started: {formatDate(order.startedAt)}
-              </TextRegular>
-              <TextRegular textStyle={styles.text}>
-                Sent: {formatDate(order.sentAt)}
-              </TextRegular>
-              <TextRegular textStyle={styles.text}>
-                Delivered: {formatDate(order.deliveredAt)}
-              </TextRegular>
-
-              <TextRegular textStyle={styles.text}>
-                Address: {order.address}
-              </TextRegular>
-
-              <TextRegular textStyle={styles.text}>
-                Price: {order.price.toFixed(2)} €
-              </TextRegular>
-
-              <TextRegular textStyle={styles.text}>
-                ShippingCosts: {order.shippingCosts.toFixed(2)} €
+              <TextRegular
+                textStyle={[
+                  styles.heroStatus,
+                  {
+                    color:
+                      order.status === 'pending'
+                        ? '#ff6b6b'
+                        : order.status === 'in process'
+                          ? '#f39c12'
+                          : order.status === 'sent'
+                            ? '#f1c40f'
+                            : '#2ecc71'
+                  }
+                ]}
+              >
+                {order.status?.toUpperCase()}
               </TextRegular>
             </View>
           </View>
         </ImageBackground>
+
+        <View style={styles.infoCard}>
+          <TextSemiBold textStyle={styles.sectionTitle}>
+            Order information
+          </TextSemiBold>
+
+          <TextRegular textStyle={styles.infoText}>
+            Address: {order.address}
+          </TextRegular>
+
+          <TextRegular textStyle={styles.infoText}>
+            Shipping: {order.shippingCosts?.toFixed(2)} €
+          </TextRegular>
+
+          <TextRegular textStyle={styles.totalText}>
+            Total: {order.price.toFixed(2)} €
+          </TextRegular>
+        </View>
+
+        <View style={styles.infoCard}>
+          <TextSemiBold textStyle={styles.sectionTitle}>Timeline</TextSemiBold>
+
+          <TextRegular textStyle={styles.infoText}>
+            Created: {formatDate(order.createdAt)}
+          </TextRegular>
+
+          <TextRegular textStyle={styles.infoText}>
+            Started: {formatDate(order.startedAt)}
+          </TextRegular>
+
+          <TextRegular textStyle={styles.infoText}>
+            Sent: {formatDate(order.sentAt)}
+          </TextRegular>
+
+          <TextRegular textStyle={styles.infoText}>
+            Delivered: {formatDate(order.deliveredAt)}
+          </TextRegular>
+        </View>
 
         {order.status === 'pending' && (
           <View style={styles.buttonContainer}>
@@ -335,27 +317,50 @@ const styles = StyleSheet.create({
     height: 250,
     justifyContent: 'center'
   },
-  headerContainer: {
-    height: 250,
-    padding: 20,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    flexDirection: 'column',
-    justifyContent: 'center'
+  heroImage: {
+    width: '100%',
+    height: 240
   },
-  centerContent: {
+  heroImageStyle: {
+    resizeMode: 'cover'
+  },
+  heroOverlay: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    justifyContent: 'flex-end'
   },
-  textTitle: {
-    fontSize: 20,
-    color: 'white'
+  heroContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    alignItems: 'flex-start'
   },
-  text: {
-    fontSize: 16,
+  heroTitle: {
+    fontSize: 30,
     color: 'white',
-    alignSelf: 'center',
-    marginLeft: 5
+    marginBottom: 6
+  },
+  heroStatus: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4
+  },
+  infoCard: {
+    backgroundColor: 'white',
+    marginHorizontal: 15,
+    marginTop: 15,
+    padding: 18,
+    borderRadius: 14,
+    elevation: 2
+  },
+  sectionTitle: {
+    fontSize: 18,
+    marginBottom: 14,
+    color: '#222'
+  },
+  totalText: {
+    marginTop: 8,
+    fontSize: 22,
+    color: GlobalStyles.brandSuccess
   },
   container: {
     flex: 1
@@ -366,16 +371,15 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
   buttonContainer: {
-    padding: 15,
-    alignItems: 'center',
+    paddingHorizontal: 15,
+    paddingTop: 15,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     gap: 10
   },
   button: {
     backgroundColor: '#2ecc71',
-    padding: 12,
-    borderRadius: 8,
+    paddingVertical: 14,
+    borderRadius: 12,
     flex: 1,
     alignItems: 'center'
   },
