@@ -21,7 +21,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 export default function RestaurantDetailScreen({ navigation, route }) {
   const [restaurant, setRestaurant] = useState({})
   const [quantities, setQuantities] = useState({})
-  const { addProduct, cartItems, getTotalPrice, restaurantId } =
+  const { addProduct, cartItems, getTotalPrice, restaurantId, updateQuantity } =
     useContext(CartContext)
   const { loggedInUser } = useContext(AuthorizationContext)
 
