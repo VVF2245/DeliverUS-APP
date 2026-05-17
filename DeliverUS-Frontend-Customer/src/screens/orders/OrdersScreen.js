@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react'
 import { StyleSheet, View, Pressable, FlatList } from 'react-native'
+import DropDownPicker from 'react-native-dropdown-picker'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { getUserOrders, remove } from '../../api/OrderEndpoints'
 import TextRegular from '../../components/TextRegular'
@@ -19,6 +20,10 @@ export default function OrdersScreen({ navigation, route }) {
   const [orderToBeDeleted, setOrderToBeDeleted] = useState(null)
   const { loggedInUser } = useContext(AuthorizationContext)
 
+  const [open, setOpen] = useState(false)
+  const [filterRestaurant, setFilterRestaurant] = useState('all')
+  const [items, setItems] = useState([])
+
   useEffect(() => {
     if (loggedInUser) {
       fetchOrders()
@@ -26,6 +31,25 @@ export default function OrdersScreen({ navigation, route }) {
       setOrders([])
     }
   }, [loggedInUser, route.params?.dirty])
+
+  useEffect(() => {
+    const restaurants = Array.from(
+      new Map(orders.map(o => [o.restaurant?.id, o.restaurant])).values()
+    )
+
+    setItems([
+      { label: 'All restaurants', value: 'all' },
+      ...restaurants.map(r => ({
+        label: r.name,
+        value: r.id
+      }))
+    ])
+  }, [orders])
+
+  const processedOrders = orders.filter(order => {
+    if (filterRestaurant === 'all') return true
+    return order.restaurant?.id === filterRestaurant
+  })
 
   /*
 MOCK useEffect
@@ -167,10 +191,25 @@ MOCK useEffect
 
   return (
     <>
+      <View style={styles.topBar}>
+        <DropDownPicker
+          open={open}
+          value={filterRestaurant}
+          items={items}
+          setOpen={setOpen}
+          setValue={setFilterRestaurant}
+          setItems={setItems}
+          placeholder="Filter"
+          style={styles.dropdown}
+          containerStyle={styles.dropdownContainer}
+          dropdownContainerStyle={styles.dropdownBox}
+        />
+      </View>
       <FlatList
         style={styles.container}
-        data={orders}
+        data={processedOrders}
         renderItem={renderOrder}
+        contentContainerStyle={{ paddingTop: 40 }}
         keyExtractor={item => item.id.toString()}
         ListEmptyComponent={renderEmptyOrdersList}
       />
@@ -231,5 +270,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
     opacity: 0.7
+  },
+  topBar: {
+    position: 'absolute',
+    top: 10,
+    right: 30,
+    zIndex: 1000
+  },
+  dropdownContainer: {
+    width: 160
+  },
+  dropdown: {
+    minHeight: 40,
+    borderWidth: 0.5
+  },
+  dropdownBox: {
+    borderWidth: 0.5
   }
 })
