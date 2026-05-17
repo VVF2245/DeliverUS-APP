@@ -1,12 +1,5 @@
 import { useContext, useState } from 'react'
-import {
-  StyleSheet,
-  View,
-  FlatList,
-  Pressable,
-  Alert,
-  TextInput
-} from 'react-native'
+import { StyleSheet, View, FlatList, Pressable, TextInput } from 'react-native'
 import { showMessage } from 'react-native-flash-message'
 import TextRegular from '../../components/TextRegular'
 import TextSemiBold from '../../components/TextSemiBold'
@@ -24,14 +17,12 @@ export default function CreateOrderScreen({ navigation }) {
     removeProduct,
     updateQuantity,
     clearCart,
-    getTotalPrice,
     getTotalPriceWithShipping,
     restaurantId,
     orderId
   } = useContext(CartContext)
   const { loggedInUser } = useContext(AuthorizationContext)
   const [loading, setLoading] = useState(false)
-  const [order, setOrder] = useState({})
   const [orderToDismiss, setOrderToDismiss] = useState(false)
   const [orderToConfirm, setOrderToConfirm] = useState(false)
   const [address, setAddress] = useState(loggedInUser.address)
@@ -60,6 +51,9 @@ export default function CreateOrderScreen({ navigation }) {
       })
       return
     }
+
+    setLoading(true)
+
     try {
       const orderData = {
         address: address,
@@ -84,8 +78,8 @@ export default function CreateOrderScreen({ navigation }) {
           ...orderData,
           restaurantId: Number(restaurantId)
         }
-        const createdOrder = await createOrder(newOrderData)
-        setOrder(createdOrder)
+        await createOrder(newOrderData)
+
         showMessage({
           message: 'Order confirmed successfully!',
           type: 'success',

@@ -1,11 +1,11 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useCallback, useState } from 'react'
+import { useFocusEffect } from '@react-navigation/native'
 import { StyleSheet, View, Pressable, FlatList } from 'react-native'
 import DropDownPicker from 'react-native-dropdown-picker'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { getUserOrders, remove } from '../../api/OrderEndpoints'
 import TextRegular from '../../components/TextRegular'
 import TextSemiBold from '../../components/TextSemiBold'
-import { brandPrimary, brandPrimaryTap } from '../../styles/GlobalStyles'
 import * as GlobalStyles from '../../styles/GlobalStyles'
 import { AuthorizationContext } from '../../context/AuthorizationContext'
 import { showMessage } from 'react-native-flash-message'
@@ -13,7 +13,6 @@ import ImageCard from '../../components/ImageCard'
 import DeleteModal from '../../components/DeleteModal'
 import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
 import { API_BASE_URL } from '@env'
-import { getRestaurantCategories } from '../../api/RestaurantEndpoints'
 
 export default function OrdersScreen({ navigation, route }) {
   const [orders, setOrders] = useState([])
@@ -24,13 +23,15 @@ export default function OrdersScreen({ navigation, route }) {
   const [filterRestaurant, setFilterRestaurant] = useState('all')
   const [items, setItems] = useState([])
 
-  useEffect(() => {
-    if (loggedInUser) {
-      fetchOrders()
-    } else {
-      setOrders([])
-    }
-  }, [loggedInUser, route.params?.dirty])
+  useFocusEffect(
+    useCallback(() => {
+      if (loggedInUser) {
+        fetchOrders()
+      } else {
+        setOrders([])
+      }
+    }, [loggedInUser])
+  )
 
   useEffect(() => {
     const restaurants = Array.from(
