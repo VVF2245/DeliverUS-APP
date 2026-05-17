@@ -21,12 +21,20 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 export default function RestaurantDetailScreen({ navigation, route }) {
   const [restaurant, setRestaurant] = useState({})
   const [quantities, setQuantities] = useState({})
-  const { addProduct, cartItems, getTotalPrice, restaurantId } = useContext(CartContext)
+  const { addProduct, cartItems, getTotalPrice, restaurantId, updateQuantity } = useContext(CartContext)
   const { loggedInUser } = useContext(AuthorizationContext)
 
   useEffect(() => {
     fetchRestaurantDetail()
   }, [route])
+
+  useEffect(() => {
+    const cartQuantities = {}
+    cartItems.forEach(item => {
+      cartQuantities[item.id] = item.quantity
+    })
+    setQuantities(cartQuantities)
+  }, [cartItems])
 
   const renderHeader = () => {
     return (
@@ -126,14 +134,28 @@ export default function RestaurantDetailScreen({ navigation, route }) {
       }
 
       if (quantity > 0) {
-        addProduct(item, quantity, restaurant.id)
+        const productExists = cartItems.find(cartItem => cartItem.id === item.id)
+        
+        if (productExists) {
+          // Si el producto ya está en el carrito, actualizar la cantidad
+          updateQuantity(item.id, quantity)
+          showMessage({
+            message: `${item.name} quantity updated`,
+            type: 'success',
+            style: GlobalStyles.flashStyle,
+            titleStyle: GlobalStyles.flashTextStyle
+          })
+        } else {
+          // Si es nuevo, agregarlo normalmente
+          addProduct(item, quantity, restaurant.id, restaurant.shippingCosts)
+          showMessage({
+            message: `${item.name} added to cart`,
+            type: 'success',
+            style: GlobalStyles.flashStyle,
+            titleStyle: GlobalStyles.flashTextStyle
+          })
+        }
         setQuantities({ ...quantities, [item.id]: 0 })
-        showMessage({
-          message: `${item.name} added to cart`,
-          type: 'success',
-          style: GlobalStyles.flashStyle,
-          titleStyle: GlobalStyles.flashTextStyle
-        })
       } else {
         showMessage({
           message: 'Please select a quantity',

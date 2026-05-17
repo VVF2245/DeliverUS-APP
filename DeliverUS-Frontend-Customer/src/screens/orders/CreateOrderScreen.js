@@ -7,7 +7,7 @@ import * as GlobalStyles from '../../styles/GlobalStyles'
 import { CartContext } from '../../context/CartContext'
 import { AuthorizationContext } from '../../context/AuthorizationContext'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { createOrder } from '../../api/OrderEndpoints'
+import { createOrder, updateOrder } from '../../api/OrderEndpoints'
 import DeleteModal from '../../components/DeleteModal'
 import ConfirmModal from '../../components/ConfirmModal.js'
 
@@ -18,7 +18,9 @@ export default function CreateOrderScreen({ navigation }) {
     updateQuantity,
     clearCart,
     getTotalPrice,
-    restaurantId
+    getTotalPriceWithShipping,
+    restaurantId,
+    orderId
   } = useContext(CartContext)
   const { loggedInUser } = useContext(AuthorizationContext)
   const [loading, setLoading] = useState(false)
@@ -53,25 +55,39 @@ export default function CreateOrderScreen({ navigation }) {
     try {
       
       const orderData = {
-        restaurantId: Number(restaurantId),
-        address: loggedInUser.address, // Es obligatorio en el backend
+        address: loggedInUser.address,
         products: cartItems.map(item => ({
           productId: item.id,
           quantity: item.quantity
         }))
       }
 
-      const createdOrder = await createOrder(orderData)
-      setOrder(createdOrder)
+      if (orderId) {
+        // Actualizando orden existente - NO incluir restaurantId
+        await updateOrder(orderId, orderData)
+        showMessage({
+          message: 'Order updated successfully!',
+          type: 'success',
+          style: GlobalStyles.flashStyle,
+          titleStyle: GlobalStyles.flashTextStyle
+        })
+      } else {
+        // Creando nueva orden - SÍ incluir restaurantId
+        const newOrderData = {
+          ...orderData,
+          restaurantId: Number(restaurantId)
+        }
+        const createdOrder = await createOrder(newOrderData)
+        setOrder(createdOrder)
+        showMessage({
+          message: 'Order confirmed successfully!',
+          type: 'success',
+          style: GlobalStyles.flashStyle,
+          titleStyle: GlobalStyles.flashTextStyle
+        })
+      }
 
       clearCart()
-      showMessage({
-        message: 'Order confirmed successfully!',
-        type: 'success',
-        style: GlobalStyles.flashStyle,
-        titleStyle: GlobalStyles.flashTextStyle
-      })
-
       navigation.navigate('OrdersScreen', {
         dirty: true
       })
@@ -156,7 +172,7 @@ export default function CreateOrderScreen({ navigation }) {
         <View style={styles.totalContainer}>
           <TextSemiBold textStyle={styles.totalLabel}>Total:</TextSemiBold>
           <TextSemiBold textStyle={styles.totalPrice}>
-            {getTotalPrice().toFixed(2)}€
+            {getTotalPriceWithShipping().toFixed(2)}€
           </TextSemiBold>
         </View>
         <View style={styles.buttonsContainer}>

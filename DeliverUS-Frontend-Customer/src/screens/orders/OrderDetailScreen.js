@@ -131,8 +131,7 @@ export default function OrderDetailScreen({ navigation, route }) {
           <View style={styles.headerContainer}>
             {/* TÍTULO A LA IZQUIERDA */}
             <TextSemiBold textStyle={styles.textTitle}>
-              Order #{order.id} - Total:{' '}
-              {(order.price + order.shippingCosts || 0).toFixed(2)} €
+              Order #{order.id}
             </TextSemiBold>
 
             <View style={styles.centerContent}>
@@ -189,7 +188,7 @@ export default function OrderDetailScreen({ navigation, route }) {
               style={[styles.button, styles.secondaryButton]}
               onPress={() => {
                 loadOrderIntoCart(order)
-                console.log('Editar pedido (productos)')
+                navigation.navigate('RestaurantDetailScreen', { id: order.restaurantId })
               }}
             >
               <TextRegular textStyle={styles.buttonText}>
