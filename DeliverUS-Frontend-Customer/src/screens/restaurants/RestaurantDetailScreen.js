@@ -21,7 +21,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 export default function RestaurantDetailScreen({ navigation, route }) {
   const [restaurant, setRestaurant] = useState({})
   const [quantities, setQuantities] = useState({})
-  const { addProduct, cartItems, getTotalPrice, restaurantId } =
+  const { addProduct, cartItems, getTotalPrice, restaurantId, updateQuantity } =
     useContext(CartContext)
   const { loggedInUser } = useContext(AuthorizationContext)
 
@@ -117,8 +117,10 @@ export default function RestaurantDetailScreen({ navigation, route }) {
       }
 
       if (quantity > 0) {
-        const productExists = cartItems.find(cartItem => cartItem.id === item.id)
-        
+        const productExists = cartItems.find(
+          cartItem => cartItem.id === item.id
+        )
+
         if (productExists) {
           // Si el producto ya está en el carrito, actualizar la cantidad
           updateQuantity(item.id, quantity)

@@ -1,5 +1,12 @@
 import { useContext, useState } from 'react'
-import { StyleSheet, View, FlatList, Pressable, Alert } from 'react-native'
+import {
+  StyleSheet,
+  View,
+  FlatList,
+  Pressable,
+  Alert,
+  TextInput
+} from 'react-native'
 import { showMessage } from 'react-native-flash-message'
 import TextRegular from '../../components/TextRegular'
 import TextSemiBold from '../../components/TextSemiBold'
@@ -27,6 +34,7 @@ export default function CreateOrderScreen({ navigation }) {
   const [order, setOrder] = useState({})
   const [orderToDismiss, setOrderToDismiss] = useState(false)
   const [orderToConfirm, setOrderToConfirm] = useState(false)
+  const [address, setAddress] = useState(loggedInUser.address)
 
   const handleRemoveProduct = productId => {
     removeProduct(productId)
@@ -53,9 +61,8 @@ export default function CreateOrderScreen({ navigation }) {
       return
     }
     try {
-      
       const orderData = {
-        address: loggedInUser.address,
+        address: address,
         products: cartItems.map(item => ({
           productId: item.id,
           quantity: item.quantity
@@ -174,6 +181,18 @@ export default function CreateOrderScreen({ navigation }) {
           <TextSemiBold textStyle={styles.totalPrice}>
             {getTotalPriceWithShipping().toFixed(2)}€
           </TextSemiBold>
+        </View>
+        <View style={styles.addressContainer}>
+          <TextSemiBold textStyle={styles.addressLabel}>
+            Delivery address
+          </TextSemiBold>
+          <TextInput
+            value={address}
+            onChangeText={setAddress}
+            placeholder="Enter delivery address..."
+            placeholderTextColor="#999"
+            style={styles.addressInput}
+          />
         </View>
         <View style={styles.buttonsContainer}>
           <Pressable
@@ -344,5 +363,22 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
     fontWeight: 'bold'
+  },
+  addressContainer: {
+    marginHorizontal: 10,
+    marginBottom: 15
+  },
+  addressLabel: {
+    fontSize: 14,
+    marginBottom: 6,
+    color: '#333'
+  },
+  addressInput: {
+    backgroundColor: 'white',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    fontSize: 14
   }
 })
