@@ -8,9 +8,9 @@ function getDetail(id) {
 function createOrder(cart) {
   return post('orders', cart)
 }
-function updateOrder(cart) {
+function updateOrder(orderId, cart) {
   console.log(cart)
-  return put('orders', cart)
+  return put(`orders/${orderId}`, cart)
 }
 
 function remove(id) {

@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react'
 import { StyleSheet, View, Pressable, FlatList } from 'react-native'
-
-import { getUserOrders } from '../../api/OrderEndpoints'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { getUserOrders, remove } from '../../api/OrderEndpoints'
 import TextRegular from '../../components/TextRegular'
 import TextSemiBold from '../../components/TextSemiBold'
 import { brandPrimary, brandPrimaryTap } from '../../styles/GlobalStyles'
@@ -9,11 +9,13 @@ import * as GlobalStyles from '../../styles/GlobalStyles'
 import { AuthorizationContext } from '../../context/AuthorizationContext'
 import { showMessage } from 'react-native-flash-message'
 import ImageCard from '../../components/ImageCard'
+import DeleteModal from '../../components/DeleteModal'
 import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
 import { API_BASE_URL } from '@env'
 
 export default function OrdersScreen({ navigation, route }) {
   const [orders, setOrders] = useState([])
+  const [orderToBeDeleted, setOrderToBeDeleted] = useState(null)
   const { loggedInUser } = useContext(AuthorizationContext)
 
   useEffect(() => {
@@ -58,21 +60,39 @@ MOCK useEffect
 
   const renderOrder = ({ item }) => {
     return (
-      <ImageCard
-        imageUri={
-          item.restaurant?.logo
-            ? { uri: API_BASE_URL + '/' + item.restaurant.logo }
-            : restaurantLogo
-        }
-        title={item.restaurant?.name}
-        onPress={() => {
-          navigation.navigate('OrderDetailScreen', { id: item.id })
-        }}
-      >
-        <TextRegular>Status: {item.status}</TextRegular>
-
-        <TextSemiBold>{item.price?.toFixed(2)} €</TextSemiBold>
-      </ImageCard>
+      <View style={styles.orderContainer}>
+        <ImageCard
+          imageUri={
+            item.restaurant?.logo
+              ? { uri: API_BASE_URL + '/' + item.restaurant.logo }
+              : restaurantLogo
+          }
+          title={item.restaurant?.name}
+          onPress={() => {
+            navigation.navigate('OrderDetailScreen', { id: item.id })
+          }}
+        >
+          <TextRegular>Status: {item.status}</TextRegular>
+          <TextSemiBold>{item.price?.toFixed(2)} €</TextSemiBold>
+          {item.status === 'pending' && (
+            <Pressable
+              onPress={() => {
+                setOrderToBeDeleted(item)
+              }}
+              style={({ pressed }) => [
+                {
+                  backgroundColor: pressed
+                    ? GlobalStyles.brandPrimaryTap
+                    : GlobalStyles.brandPrimary
+                },
+                styles.deleteButton
+              ]}
+            >
+              <MaterialCommunityIcons name="delete" color={'white'} size={20} />
+            </Pressable>
+          )}
+        </ImageCard>
+      </View>
     )
   }
 
@@ -102,20 +122,67 @@ MOCK useEffect
     }
   }
 
+  const removeOrder = async order => {
+    try {
+      await remove(order.id)
+      await fetchOrders()
+      setOrderToBeDeleted(null)
+      showMessage({
+        message: `Order successfully removed`,
+        type: 'success',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    } catch (error) {
+      console.log(error)
+      setOrderToBeDeleted(null)
+      showMessage({
+        message: `Order could not be removed. ${order.status} orders cannot be removed. ${error}`,
+        type: 'error',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    }
+  }
+
   return (
-    <FlatList
-      style={styles.container}
-      data={orders}
-      renderItem={renderOrder}
-      keyExtractor={item => item.id.toString()}
-      ListEmptyComponent={renderEmptyOrdersList}
-    />
+    <>
+      <FlatList
+        style={styles.container}
+        data={orders}
+        renderItem={renderOrder}
+        keyExtractor={item => item.id.toString()}
+        ListEmptyComponent={renderEmptyOrdersList}
+      />
+      <DeleteModal
+        isVisible={orderToBeDeleted !== null}
+        onCancel={() => setOrderToBeDeleted(null)}
+        onConfirm={() => removeOrder(orderToBeDeleted)}
+      >
+        <TextRegular>Only pending orders can be deleted.</TextRegular>
+      </DeleteModal>
+    </>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1
+  },
+  orderContainer: {
+    position: 'relative',
+    marginBottom: 10
+  },
+  deleteButton: {
+    position: 'absolute',
+    right: 15,
+    top: 15,
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10
   },
   button: {
     borderRadius: 8,

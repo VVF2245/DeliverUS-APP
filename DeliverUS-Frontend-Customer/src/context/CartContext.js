@@ -4,9 +4,9 @@ import { createContext, useState } from 'react'
 const CartContext = createContext()
 
 const CartContextProvider = props => {
-  const [order, setOrder] = useState({ restaurantId: null, items: [] })
+  const [order, setOrder] = useState({ restaurantId: null, items: [], orderId: null, shippingCosts: 0 })
 
-  const addProduct = (product, quantity, newRestaurantId) => {
+  const addProduct = (product, quantity, newRestaurantId, shippingCosts = 0) => {
     setOrder(prevOrder => {
       // Convertir a número para asegurar comparación correcta
       const newRestId = Number(newRestaurantId)
@@ -21,7 +21,9 @@ const CartContextProvider = props => {
         )
         return {
           restaurantId: newRestId,
-          items: [{ ...product, quantity }]
+          items: [{ ...product, quantity }],
+          orderId: null,
+          shippingCosts
         }
       }
 
@@ -30,7 +32,9 @@ const CartContextProvider = props => {
         console.log(`Primer producto añadido de restaurante ${newRestId}`)
         return {
           restaurantId: newRestId,
-          items: [{ ...product, quantity }]
+          items: [{ ...product, quantity }],
+          orderId: prevOrder.orderId,
+          shippingCosts
         }
       }
 
@@ -46,13 +50,15 @@ const CartContextProvider = props => {
             item.id === product.id
               ? { ...item, quantity: item.quantity + quantity }
               : item
-          )
+          ),
+          shippingCosts
         }
       } else {
         console.log(`Producto ${product.id} es nuevo. Añadiendo.`)
         return {
           ...prevOrder,
-          items: [...prevOrder.items, { ...product, quantity }]
+          items: [...prevOrder.items, { ...product, quantity }],
+          shippingCosts
         }
       }
     })
@@ -79,7 +85,7 @@ const CartContextProvider = props => {
   }
 
   const clearCart = () => {
-    setOrder({ restaurantId: null, items: [] })
+    setOrder({ restaurantId: null, items: [], orderId: null, shippingCosts: 0 })
   }
 
   const getTotalPrice = () => {
@@ -89,8 +95,31 @@ const CartContextProvider = props => {
     )
   }
 
+  const getTotalPriceWithShipping = () => {
+    const subtotal = getTotalPrice()
+    // El backend aplica gastos de envío solo si el total es <= 10
+    if (subtotal <= 10) {
+      return subtotal + order.shippingCosts
+    }
+    return subtotal
+  }
+
   const getTotalItems = () => {
     return order.items.reduce((total, item) => total + item.quantity, 0)
+  }
+
+  const loadOrderIntoCart = orderToEdit => {
+    setOrder({
+      restaurantId: orderToEdit.restaurantId,
+      orderId: orderToEdit.id,
+      shippingCosts: orderToEdit.shippingCosts || 0,
+      items: orderToEdit.products.map(p => ({
+        id: p.id,
+        name: p.name,
+        price: p.price ?? p.OrderProducts.unityPrice,
+        quantity: p.OrderProducts.quantity
+      }))
+    })
   }
 
   return (
@@ -98,12 +127,16 @@ const CartContextProvider = props => {
       value={{
         cartItems: order.items,
         restaurantId: order.restaurantId,
+        orderId: order.orderId,
+        shippingCosts: order.shippingCosts,
         addProduct: addProduct,
         removeProduct: removeProduct,
         updateQuantity: updateQuantity,
         clearCart: clearCart,
         getTotalPrice: getTotalPrice,
-        getTotalItems: getTotalItems
+        getTotalPriceWithShipping: getTotalPriceWithShipping,
+        getTotalItems: getTotalItems,
+        loadOrderIntoCart: loadOrderIntoCart
       }}
     >
       {props.children}
