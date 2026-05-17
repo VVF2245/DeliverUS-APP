@@ -4,9 +4,19 @@ import { createContext, useState } from 'react'
 const CartContext = createContext()
 
 const CartContextProvider = props => {
-  const [order, setOrder] = useState({ restaurantId: null, items: [], orderId: null, shippingCosts: 0 })
+  const [order, setOrder] = useState({
+    restaurantId: null,
+    items: [],
+    orderId: null,
+    shippingCosts: 0
+  })
 
-  const addProduct = (product, quantity, newRestaurantId, shippingCosts = 0) => {
+  const addProduct = (
+    product,
+    quantity,
+    newRestaurantId,
+    shippingCosts = 0
+  ) => {
     setOrder(prevOrder => {
       // Convertir a número para asegurar comparación correcta
       const newRestId = Number(newRestaurantId)

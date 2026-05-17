@@ -188,7 +188,9 @@ export default function OrderDetailScreen({ navigation, route }) {
               style={[styles.button, styles.secondaryButton]}
               onPress={() => {
                 loadOrderIntoCart(order)
-                navigation.navigate('RestaurantDetailScreen', { id: order.restaurantId })
+                navigation.navigate('RestaurantDetailScreen', {
+                  id: order.restaurantId
+                })
               }}
             >
               <TextRegular textStyle={styles.buttonText}>
