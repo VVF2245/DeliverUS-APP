@@ -103,32 +103,13 @@ MOCK useEffect
   }
 
   return (
-    <>
-      <FlatList
-        style={styles.container}
-        data={orders}
-        renderItem={renderOrder}
-        keyExtractor={item => item.id.toString()}
-        ListEmptyComponent={renderEmptyOrdersList}
-      />
-      <Pressable
-        onPress={() => {
-          navigation.navigate('OrderDetailScreen', {
-            id: Math.floor(Math.random() * 100)
-          })
-        }}
-        style={({ pressed }) => [
-          {
-            backgroundColor: pressed ? brandPrimaryTap : brandPrimary
-          },
-          styles.button
-        ]}
-      >
-        <TextRegular textStyle={styles.text}>
-          Go to Order Detail Screen
-        </TextRegular>
-      </Pressable>
-    </>
+    <FlatList
+      style={styles.container}
+      data={orders}
+      renderItem={renderOrder}
+      keyExtractor={item => item.id.toString()}
+      ListEmptyComponent={renderEmptyOrdersList}
+    />
   )
 }
 
