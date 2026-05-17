@@ -21,7 +21,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 export default function RestaurantDetailScreen({ navigation, route }) {
   const [restaurant, setRestaurant] = useState({})
   const [quantities, setQuantities] = useState({})
-  const { addProduct, cartItems, getTotalPrice, restaurantId, updateQuantity } = useContext(CartContext)
+  const { addProduct, cartItems, getTotalPrice, restaurantId } =
+    useContext(CartContext)
   const { loggedInUser } = useContext(AuthorizationContext)
 
   useEffect(() => {
@@ -39,35 +40,17 @@ export default function RestaurantDetailScreen({ navigation, route }) {
   const renderHeader = () => {
     return (
       <View>
-        <View style={styles.FRHeader}>
-          <TextSemiBold>FR2: Restaurants details and menu.</TextSemiBold>
-          <TextRegular>
-            Customers will be able to query restaurants details and the products
-            offered by them.
-          </TextRegular>
-          <TextSemiBold>
-            FR3: Add, edit and remove products to a new order.
-          </TextSemiBold>
-          <TextRegular>
-            A customer can add several products, and several units of a product
-            to a new order. Before confirming, customer can edit and remove
-            products. Once the order is confirmed, it cannot be edited or
-            removed.
-          </TextRegular>
-          <TextSemiBold>FR4: Confirm or dismiss new order.</TextSemiBold>
-          <TextRegular>
-            Customers will be able to confirm or dismiss the order before
-            sending it to the backend.
-          </TextRegular>
-        </View>
-        {restaurantId && restaurantId !== restaurant.id && cartItems.length > 0 && (
-          <View style={styles.warningBanner}>
-            <MaterialCommunityIcons name="alert" size={20} color="white" />
-            <TextRegular textStyle={styles.warningText}>
-              You have items from another restaurant. Your cart will be cleared when adding items here.
-            </TextRegular>
-          </View>
-        )}
+        {restaurantId &&
+          restaurantId !== restaurant.id &&
+          cartItems.length > 0 && (
+            <View style={styles.warningBanner}>
+              <MaterialCommunityIcons name="alert" size={20} color="white" />
+              <TextRegular textStyle={styles.warningText}>
+                You have items from another restaurant. Your cart will be
+                cleared when adding items here.
+              </TextRegular>
+            </View>
+          )}
         <ImageBackground
           source={
             restaurant?.heroImage
@@ -188,11 +171,7 @@ export default function RestaurantDetailScreen({ navigation, route }) {
               onPress={decrementQuantity}
               style={[styles.quantityButton, { marginRight: 10 }]}
             >
-              <MaterialCommunityIcons
-                name="minus"
-                size={20}
-                color="white"
-              />
+              <MaterialCommunityIcons name="minus" size={20} color="white" />
             </Pressable>
             <TextSemiBold textStyle={styles.quantityText}>
               {quantity}
@@ -201,11 +180,7 @@ export default function RestaurantDetailScreen({ navigation, route }) {
               onPress={incrementQuantity}
               style={[styles.quantityButton, { marginLeft: 10 }]}
             >
-              <MaterialCommunityIcons
-                name="plus"
-                size={20}
-                color="white"
-              />
+              <MaterialCommunityIcons name="plus" size={20} color="white" />
             </Pressable>
             <Pressable
               onPress={handleAddToCart}

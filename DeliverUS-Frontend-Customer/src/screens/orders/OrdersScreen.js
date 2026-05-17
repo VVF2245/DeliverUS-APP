@@ -161,23 +161,6 @@ MOCK useEffect
       >
         <TextRegular>Only pending orders can be deleted.</TextRegular>
       </DeleteModal>
-      <Pressable
-        onPress={() => {
-          navigation.navigate('OrderDetailScreen', {
-            id: Math.floor(Math.random() * 100)
-          })
-        }}
-        style={({ pressed }) => [
-          {
-            backgroundColor: pressed ? brandPrimaryTap : brandPrimary
-          },
-          styles.button
-        ]}
-      >
-        <TextRegular textStyle={styles.text}>
-          Go to Order Detail Screen
-        </TextRegular>
-      </Pressable>
     </>
   )
 }
