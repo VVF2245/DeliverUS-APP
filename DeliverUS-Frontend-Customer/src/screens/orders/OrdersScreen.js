@@ -51,38 +51,6 @@ export default function OrdersScreen({ navigation, route }) {
     return order.restaurant?.id === filterRestaurant
   })
 
-  /*
-MOCK useEffect
-  useEffect(() => {
-    setOrders([
-      {
-        id: 1,
-        createdAt: new Date(),
-        price: 12.5,
-        shippingCosts: 2,
-        address: 'Calle Falsa 123',
-        status: 'pending',
-        restaurant: {
-          name: 'Burger King',
-          logo: null
-        }
-      },
-      {
-        id: 2,
-        createdAt: new Date(),
-        price: 25.99,
-        shippingCosts: 0,
-        address: 'Av. Canarias 45',
-        status: 'sent',
-        restaurant: {
-          name: 'Telepizza',
-          logo: null
-        }
-      }
-    ])
-  }, [])
-*/
-
   const getStatusColor = status => {
     switch (status) {
       case 'pending':
