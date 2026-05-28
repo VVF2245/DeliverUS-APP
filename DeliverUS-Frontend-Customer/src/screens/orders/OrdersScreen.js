@@ -89,10 +89,15 @@ export default function OrdersScreen({ navigation, route }) {
           <TextSemiBold>{item.price?.toFixed(2)} €</TextSemiBold>
           <TextRegular>
             created at{' '}
-            {new Date(item.createdAt)?.toLocaleDateString('en-US', {
+            {new Date(item.createdAt)?.toLocaleDateString('en-UK', {
               day: '2-digit',
               month: 'long',
               year: 'numeric'
+            })}{' '}
+            at{' '}
+            {new Date(item.createdAt)?.toLocaleTimeString('en-UK', {
+              hour: '2-digit',
+              minute: '2-digit'
             })}
           </TextRegular>
           {item.status === 'pending' && (
