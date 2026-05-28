@@ -87,6 +87,14 @@ export default function OrdersScreen({ navigation, route }) {
             Status: {item.status}
           </TextRegular>
           <TextSemiBold>{item.price?.toFixed(2)} €</TextSemiBold>
+          <TextRegular>
+            created at{' '}
+            {new Date(item.createdAt)?.toLocaleDateString('en-US', {
+              day: '2-digit',
+              month: 'long',
+              year: 'numeric'
+            })}
+          </TextRegular>
           {item.status === 'pending' && (
             <Pressable
               onPress={() => {
