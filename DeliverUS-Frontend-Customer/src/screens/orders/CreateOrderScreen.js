@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { StyleSheet, View, FlatList, Pressable, TextInput } from 'react-native'
 import { showMessage } from 'react-native-flash-message'
 import TextRegular from '../../components/TextRegular'
@@ -8,6 +8,7 @@ import { CartContext } from '../../context/CartContext'
 import { AuthorizationContext } from '../../context/AuthorizationContext'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { createOrder, updateOrder } from '../../api/OrderEndpoints'
+import { getDetail } from '../../api/RestaurantEndpoints.js'
 import DeleteModal from '../../components/DeleteModal'
 import ConfirmModal from '../../components/ConfirmModal.js'
 
@@ -26,6 +27,11 @@ export default function CreateOrderScreen({ navigation }) {
   const [orderToDismiss, setOrderToDismiss] = useState(false)
   const [orderToConfirm, setOrderToConfirm] = useState(false)
   const [address, setAddress] = useState(loggedInUser.address)
+  const [shippingCosts, setShippingCosts] = useState(0)
+
+  useEffect(() => {
+    fetchShippingCost()
+  }, [])
 
   const handleRemoveProduct = productId => {
     removeProduct(productId)
@@ -39,6 +45,21 @@ export default function CreateOrderScreen({ navigation }) {
 
   const handleUpdateQuantity = (productId, quantity) => {
     updateQuantity(productId, quantity)
+  }
+
+  const fetchShippingCost = async () => {
+    try {
+      const restaurant = await getDetail(restaurantId)
+      const fetchedShippingCosts = restaurant.shippingCosts
+      setShippingCosts(fetchedShippingCosts)
+    } catch (error) {
+      showMessage({
+        message: `There was an error while retrieving shipping costs. ${error} `,
+        type: 'error',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    }
   }
 
   const handleConfirmOrder = async () => {
@@ -170,6 +191,14 @@ export default function CreateOrderScreen({ navigation }) {
 
     return (
       <View style={styles.footer}>
+        <View style={styles.shippingCostsContainer}>
+          <TextSemiBold textStyle={styles.shippingCostLabel}>
+            Shipping Costs:
+          </TextSemiBold>
+          <TextSemiBold textStyle={styles.shippingCostPrice}>
+            {shippingCosts?.toFixed(2)}€
+          </TextSemiBold>
+        </View>
         <View style={styles.totalContainer}>
           <TextSemiBold textStyle={styles.totalLabel}>Total:</TextSemiBold>
           <TextSemiBold textStyle={styles.totalPrice}>
@@ -333,6 +362,19 @@ const styles = StyleSheet.create({
   totalPrice: {
     fontSize: 20,
     color: GlobalStyles.brandSuccess
+  },
+  shippingCostLabel: {
+    fontSize: 10
+  },
+  shippingCostPrice: {
+    color: '#333'
+  },
+  shippingCostsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 5,
+    paddingBottom: 5
   },
   buttonsContainer: {
     flexDirection: 'row',
