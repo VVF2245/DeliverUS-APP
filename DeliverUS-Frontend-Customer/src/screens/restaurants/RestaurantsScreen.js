@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import { StyleSheet, View, FlatList, useWindowDimensions } from 'react-native'
 import TextSemiBold from '../../components/TextSemiBold'
 import TextRegular from '../../components/TextRegular'
@@ -11,11 +11,13 @@ import { showMessage } from 'react-native-flash-message'
 import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
 import defaultProductImage from '../../../assets/product.jpeg'
 import { API_BASE_URL } from '@env'
+import { CartContext } from '../../context/CartContext'
 
 export default function RestaurantsScreen({ navigation, route }) {
   const [restaurants, setRestaurants] = useState([])
 
   const { width: screenWidth } = useWindowDimensions()
+  const { addProduct } = useContext(CartContext)
 
   const fetchRestaurants = async () => {
     try {
@@ -52,6 +54,14 @@ export default function RestaurantsScreen({ navigation, route }) {
     fetchRestaurants()
     fetchTop3Products()
   }, [route])
+
+  const handleTopProductPress = product => {
+    addProduct(product, 1, product.restaurantId, product.shippingCosts)
+
+    navigation.navigate('RestaurantDetailScreen', {
+      id: product.restaurantId
+    })
+  }
 
   const renderRestaurantWithImageCard = ({ item }) => {
     return (
@@ -97,11 +107,7 @@ export default function RestaurantsScreen({ navigation, route }) {
         style={{
           width: screenWidth * 0.7
         }}
-        onPress={() => {
-          navigation.navigate('RestaurantDetailScreen', {
-            id: item.restaurantId
-          })
-        }}
+        onPress={() => handleTopProductPress(item)}
       >
         <TextRegular numberOfLines={2}>{item.description}</TextRegular>{' '}
         <TextSemiBold textStyle={styles.price}>
