@@ -17,10 +17,10 @@ import { API_BASE_URL } from '@env'
 import { CartContext } from '../../context/CartContext'
 import { AuthorizationContext } from '../../context/AuthorizationContext'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
+import restaurantBackground from '../../../assets/restaurantBackground.jpeg'
 
 export default function RestaurantDetailScreen({ navigation, route }) {
   const [restaurant, setRestaurant] = useState({})
-  const [quantities, setQuantities] = useState({})
   const { addProduct, cartItems, restaurantId, updateQuantity } =
     useContext(CartContext)
   const { loggedInUser } = useContext(AuthorizationContext)
@@ -29,13 +29,23 @@ export default function RestaurantDetailScreen({ navigation, route }) {
     fetchRestaurantDetail()
   }, [route])
 
-  useEffect(() => {
-    const cartQuantities = {}
-    cartItems.forEach(item => {
-      cartQuantities[item.id] = item.quantity
-    })
-    setQuantities(cartQuantities)
-  }, [cartItems])
+  const fetchRestaurantDetail = async () => {
+    try {
+      const fetchedRestaurant = await getDetail(route.params.id)
+      setRestaurant(fetchedRestaurant)
+    } catch (error) {
+      showMessage({
+        message: `There was an error while retrieving restaurant details (id ${route.params.id}). ${error}`,
+        type: 'error',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    }
+  }
+
+  const heroSource = restaurant?.heroImage
+    ? { uri: API_BASE_URL + '/' + restaurant.heroImage }
+    : restaurantBackground
 
   const renderHeader = () => {
     return (
@@ -52,15 +62,9 @@ export default function RestaurantDetailScreen({ navigation, route }) {
             </View>
           )}
         <ImageBackground
-          source={
-            restaurant?.heroImage
-              ? {
-                  uri: API_BASE_URL + '/' + restaurant.heroImage,
-                  cache: 'force-cache'
-                }
-              : undefined
-          }
+          source={heroSource}
           style={styles.imageBackground}
+          imageStyle={styles.imageStyle}
         >
           <View style={styles.restaurantHeaderContainer}>
             <TextSemiBold textStyle={styles.textTitle}>
@@ -92,19 +96,11 @@ export default function RestaurantDetailScreen({ navigation, route }) {
   }
 
   const renderProduct = ({ item }) => {
-    const quantity = quantities[item.id] || 0
+    const cartItem = cartItems.find(cartItem => cartItem.id === item.id)
+
+    const quantity = cartItem ? cartItem.quantity : 0
 
     const incrementQuantity = () => {
-      setQuantities({ ...quantities, [item.id]: quantity + 1 })
-    }
-
-    const decrementQuantity = () => {
-      if (quantity > 0) {
-        setQuantities({ ...quantities, [item.id]: quantity - 1 })
-      }
-    }
-
-    const handleAddToCart = () => {
       if (!loggedInUser) {
         showMessage({
           message: 'Please log in to add products to your order',
@@ -116,38 +112,18 @@ export default function RestaurantDetailScreen({ navigation, route }) {
         return
       }
 
-      if (quantity > 0) {
-        const productExists = cartItems.find(
-          cartItem => cartItem.id === item.id
-        )
-
-        if (productExists) {
-          // Si el producto ya está en el carrito, actualizar la cantidad
-          updateQuantity(item.id, quantity)
-          showMessage({
-            message: `${item.name} quantity updated`,
-            type: 'success',
-            style: GlobalStyles.flashStyle,
-            titleStyle: GlobalStyles.flashTextStyle
-          })
-        } else {
-          // Si es nuevo, agregarlo normalmente
-          addProduct(item, quantity, restaurant.id, restaurant.shippingCosts)
-          showMessage({
-            message: `${item.name} added to cart`,
-            type: 'success',
-            style: GlobalStyles.flashStyle,
-            titleStyle: GlobalStyles.flashTextStyle
-          })
-        }
-        setQuantities({ ...quantities, [item.id]: 0 })
+      if (cartItem) {
+        updateQuantity(item.id, quantity + 1)
       } else {
-        showMessage({
-          message: 'Please select a quantity',
-          type: 'warning',
-          style: GlobalStyles.flashStyle,
-          titleStyle: GlobalStyles.flashTextStyle
-        })
+        addProduct(item, 1, restaurant.id, restaurant.shippingCosts)
+      }
+    }
+
+    const decrementQuantity = () => {
+      if (quantity > 1) {
+        updateQuantity(item.id, quantity - 1)
+      } else if (quantity === 1) {
+        updateQuantity(item.id, 0)
       }
     }
 
@@ -184,17 +160,6 @@ export default function RestaurantDetailScreen({ navigation, route }) {
             >
               <MaterialCommunityIcons name="plus" size={20} color="white" />
             </Pressable>
-            <Pressable
-              onPress={handleAddToCart}
-              style={[styles.addButton, { marginLeft: 'auto' }]}
-            >
-              <MaterialCommunityIcons
-                name="cart-plus"
-                size={20}
-                color="white"
-              />
-              <TextRegular textStyle={styles.addButtonText}>Add</TextRegular>
-            </Pressable>
           </View>
         )}
       </ImageCard>
@@ -207,20 +172,6 @@ export default function RestaurantDetailScreen({ navigation, route }) {
         This restaurant has no products yet.
       </TextRegular>
     )
-  }
-
-  const fetchRestaurantDetail = async () => {
-    try {
-      const fetchedRestaurant = await getDetail(route.params.id)
-      setRestaurant(fetchedRestaurant)
-    } catch (error) {
-      showMessage({
-        message: `There was an error while retrieving restaurant details (id ${route.params.id}). ${error}`,
-        type: 'error',
-        style: GlobalStyles.flashStyle,
-        titleStyle: GlobalStyles.flashTextStyle
-      })
-    }
   }
 
   return (
@@ -261,9 +212,11 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   imageBackground: {
-    flex: 1,
-    resizeMode: 'cover',
-    justifyContent: 'center'
+    width: '100%',
+    height: 250
+  },
+  imageStyle: {
+    resizeMode: 'cover'
   },
   image: {
     height: 100,
@@ -304,7 +257,8 @@ const styles = StyleSheet.create({
   quantityContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10
+    marginTop: 10,
+    justifyContent: 'flex-end'
   },
   quantityButton: {
     backgroundColor: GlobalStyles.brandPrimary,

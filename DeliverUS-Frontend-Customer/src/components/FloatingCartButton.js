@@ -9,9 +9,9 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 // boton del carrito
 export default function FloatingCartButton() {
   const navigation = useNavigation()
-  const { cartItems, getTotalPrice } = useContext(CartContext)
+  const { getTotalPrice, getTotalItems } = useContext(CartContext)
 
-  if (cartItems.length === 0) {
+  if (getTotalItems() === 0) {
     return null
   }
 
@@ -24,7 +24,7 @@ export default function FloatingCartButton() {
     >
       <View style={styles.cartBadge}>
         <TextSemiBold textStyle={styles.cartBadgeText}>
-          {cartItems.length}
+          {getTotalItems()}
         </TextSemiBold>
       </View>
       <TextSemiBold textStyle={styles.cartButtonText}>

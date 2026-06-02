@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { StyleSheet, View, ScrollView, FlatList } from 'react-native'
+import { useEffect, useState, useContext } from 'react'
+import { StyleSheet, View, FlatList, useWindowDimensions } from 'react-native'
 import TextSemiBold from '../../components/TextSemiBold'
 import TextRegular from '../../components/TextRegular'
 import { getAll } from '../../api/RestaurantEndpoints'
@@ -11,9 +11,13 @@ import { showMessage } from 'react-native-flash-message'
 import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
 import defaultProductImage from '../../../assets/product.jpeg'
 import { API_BASE_URL } from '@env'
+import { CartContext } from '../../context/CartContext'
 
 export default function RestaurantsScreen({ navigation, route }) {
   const [restaurants, setRestaurants] = useState([])
+
+  const { width: screenWidth } = useWindowDimensions()
+  const { addProduct } = useContext(CartContext)
 
   const fetchRestaurants = async () => {
     try {
@@ -44,12 +48,20 @@ export default function RestaurantsScreen({ navigation, route }) {
   }
 
   useEffect(() => {
-    // TODO: Fetch all restaurants and set them to state.
-    //      Notice that it is not required to be logged in.
-    // TODO: set restaurants to state
+    // Fetch all restaurants and set them to state.
+    // Notice that it is not required to be logged in.
+    // set restaurants to state
     fetchRestaurants()
     fetchTop3Products()
   }, [route])
+
+  const handleTopProductPress = product => {
+    addProduct(product, 1, product.restaurantId, product.shippingCosts)
+
+    navigation.navigate('RestaurantDetailScreen', {
+      id: product.restaurantId
+    })
+  }
 
   const renderRestaurantWithImageCard = ({ item }) => {
     return (
@@ -85,18 +97,17 @@ export default function RestaurantsScreen({ navigation, route }) {
     return (
       <ImageCard
         imageUri={
-          item.logo
+          item.image
             ? { uri: API_BASE_URL + '/' + item.image }
             : defaultProductImage
         }
         title={item.name}
         isHorizontal={true}
         backgroundButtom={GlobalStyles.brandPrimaryTap}
-        onPress={() => {
-          navigation.navigate('RestaurantDetailScreen', {
-            id: item.restaurantId
-          })
+        style={{
+          width: screenWidth * 0.7
         }}
+        onPress={() => handleTopProductPress(item)}
       >
         <TextRegular numberOfLines={2}>{item.description}</TextRegular>{' '}
         <TextSemiBold textStyle={styles.price}>
@@ -112,49 +123,51 @@ export default function RestaurantsScreen({ navigation, route }) {
   }
 
   return (
-    <>
-      <View style={styles.container}>
-        <TextSemiBold style={[styles.title, { fontSize: 24 }]}>
-          Pick your favourite restaurant
-        </TextSemiBold>
-        <FlatList
-          data={restaurants}
-          renderItem={renderRestaurantWithImageCard}
-          keyExtractor={item => item.id.toString()}
-          showsVerticalScrollIndicator={false}
-        />
-      </View>
-      <View style={styles.popularHeader}>
-        <TextSemiBold style={[styles.title, { fontSize: 24, color: 'yellow' }]}>
-          Trending at Restaurants
-        </TextSemiBold>
-        <View style={styles.section}>
-          <FlatList
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            data={top3Products}
-            renderItem={renderPopularProducts}
-            keyExtractor={item => item.id.toString()}
-          />
-        </View>
-      </View>
-    </>
+    <View style={styles.container}>
+      <FlatList
+        data={restaurants}
+        renderItem={renderRestaurantWithImageCard}
+        keyExtractor={item => item.id.toString()}
+        ListHeaderComponent={
+          <View style={styles.headerContent}>
+            <View style={styles.popularHeader}>
+              <TextSemiBold
+                style={[styles.title, { fontSize: 24, color: 'yellow' }]}
+              >
+                Trending at Restaurants
+              </TextSemiBold>
+              <FlatList
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                data={top3Products}
+                renderItem={renderPopularProducts}
+                keyExtractor={item => item.id.toString()}
+                contentContainerStyle={styles.horizontalList}
+                style={{ width: screenWidth }}
+              />
+            </View>
+            <TextSemiBold style={[styles.title, { fontSize: 24 }]}>
+              Pick your favourite restaurant
+            </TextSemiBold>
+          </View>
+        }
+      />
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
   popularHeader: {
     justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: GlobalStyles.brandPrimaryTap,
     paddingVertical: 20,
-    flex: 1
+    width: '100%'
+  },
+  headerContent: {
+    alignItems: 'center'
   },
   container: {
-    flex: 2,
-    alignItems: 'center',
-    marginHorizontal: 20,
-    paddingTop: 20
+    flex: 1
   },
   emptyList: {
     textAlign: 'center',
@@ -166,7 +179,11 @@ const styles = StyleSheet.create({
   availability: {
     color: GlobalStyles.brandSecondary
   },
-  // estilos creados para mejorar el aspecto final de la pagina
+  horizontalList: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   title: {
     fontWeight: 'bold',
     color: '#333',
