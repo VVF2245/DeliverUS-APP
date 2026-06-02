@@ -17,6 +17,7 @@ import { API_BASE_URL } from '@env'
 import { CartContext } from '../../context/CartContext'
 import { AuthorizationContext } from '../../context/AuthorizationContext'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
+import restaurantBackground from '../../../assets/restaurantBackground.jpeg'
 
 export default function RestaurantDetailScreen({ navigation, route }) {
   const [restaurant, setRestaurant] = useState({})
@@ -27,6 +28,24 @@ export default function RestaurantDetailScreen({ navigation, route }) {
   useEffect(() => {
     fetchRestaurantDetail()
   }, [route])
+
+  const fetchRestaurantDetail = async () => {
+    try {
+      const fetchedRestaurant = await getDetail(route.params.id)
+      setRestaurant(fetchedRestaurant)
+    } catch (error) {
+      showMessage({
+        message: `There was an error while retrieving restaurant details (id ${route.params.id}). ${error}`,
+        type: 'error',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    }
+  }
+
+  const heroSource = restaurant?.heroImage
+    ? { uri: API_BASE_URL + '/' + restaurant.heroImage }
+    : restaurantBackground
 
   const renderHeader = () => {
     return (
@@ -43,15 +62,9 @@ export default function RestaurantDetailScreen({ navigation, route }) {
             </View>
           )}
         <ImageBackground
-          source={
-            restaurant?.heroImage
-              ? {
-                  uri: API_BASE_URL + '/' + restaurant.heroImage,
-                  cache: 'force-cache'
-                }
-              : undefined
-          }
+          source={heroSource}
           style={styles.imageBackground}
+          imageStyle={styles.imageStyle}
         >
           <View style={styles.restaurantHeaderContainer}>
             <TextSemiBold textStyle={styles.textTitle}>
@@ -161,20 +174,6 @@ export default function RestaurantDetailScreen({ navigation, route }) {
     )
   }
 
-  const fetchRestaurantDetail = async () => {
-    try {
-      const fetchedRestaurant = await getDetail(route.params.id)
-      setRestaurant(fetchedRestaurant)
-    } catch (error) {
-      showMessage({
-        message: `There was an error while retrieving restaurant details (id ${route.params.id}). ${error}`,
-        type: 'error',
-        style: GlobalStyles.flashStyle,
-        titleStyle: GlobalStyles.flashTextStyle
-      })
-    }
-  }
-
   return (
     <FlatList
       ListHeaderComponent={renderHeader}
@@ -213,9 +212,11 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   imageBackground: {
-    flex: 1,
-    resizeMode: 'cover',
-    justifyContent: 'center'
+    width: '100%',
+    height: 250
+  },
+  imageStyle: {
+    resizeMode: 'cover'
   },
   image: {
     height: 100,
