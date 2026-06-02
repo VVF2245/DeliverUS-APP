@@ -19,9 +19,18 @@ export default function OrdersScreen({ navigation, route }) {
   const [orderToBeDeleted, setOrderToBeDeleted] = useState(null)
   const { loggedInUser } = useContext(AuthorizationContext)
 
-  const [open, setOpen] = useState(false)
+  const [openFilter, setOpenFilter] = useState(false)
+  const [openSort, setOpenSort] = useState(false)
   const [filterRestaurant, setFilterRestaurant] = useState('all')
+  const [sortOrder, setSortOrder] = useState('date_desc')
   const [items, setItems] = useState([])
+
+  const sortItems = [
+    { label: 'Newest first', value: 'date_desc' },
+    { label: 'Oldest first', value: 'date_asc' },
+    { label: 'Price (high → low)', value: 'price_desc' },
+    { label: 'Price (low → high)', value: 'price_asc' }
+  ]
 
   useFocusEffect(
     useCallback(() => {
@@ -50,6 +59,25 @@ export default function OrdersScreen({ navigation, route }) {
   const processedOrders = orders.filter(order => {
     if (filterRestaurant === 'all') return true
     return order.restaurant?.id === filterRestaurant
+  })
+
+  const sortedOrders = [...processedOrders].sort((a, b) => {
+    switch (sortOrder) {
+      case 'date_desc':
+        return new Date(b.createdAt) - new Date(a.createdAt)
+
+      case 'date_asc':
+        return new Date(a.createdAt) - new Date(b.createdAt)
+
+      case 'price_desc':
+        return (b.price || 0) - (a.price || 0)
+
+      case 'price_asc':
+        return (a.price || 0) - (b.price || 0)
+
+      default:
+        return 0
+    }
   })
 
   const getStatusColor = status => {
@@ -175,10 +203,10 @@ export default function OrdersScreen({ navigation, route }) {
     <>
       <View style={styles.topBar}>
         <DropDownPicker
-          open={open}
+          open={openFilter}
           value={filterRestaurant}
           items={items}
-          setOpen={setOpen}
+          setOpen={setOpenFilter}
           setValue={setFilterRestaurant}
           setItems={setItems}
           placeholder="Filter"
@@ -186,10 +214,21 @@ export default function OrdersScreen({ navigation, route }) {
           containerStyle={styles.dropdownContainer}
           dropdownContainerStyle={styles.dropdownBox}
         />
+        <DropDownPicker
+          open={openSort}
+          value={sortOrder}
+          items={sortItems}
+          setOpen={setOpenSort}
+          setValue={setSortOrder}
+          placeholder="Sort"
+          style={styles.dropdown}
+          containerStyle={styles.dropdownContainer}
+          dropdownContainerStyle={styles.dropdownBox}
+        />
       </View>
       <FlatList
         style={styles.container}
-        data={processedOrders}
+        data={sortedOrders}
         renderItem={renderOrder}
         contentContainerStyle={{ paddingTop: 40 }}
         keyExtractor={item => item.id.toString()}
@@ -257,7 +296,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 30,
-    zIndex: 1000
+    zIndex: 1000,
+    flexDirection: 'row'
   },
   dropdownContainer: {
     width: 160
